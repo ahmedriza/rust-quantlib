@@ -126,7 +126,7 @@ impl private::SolverDetail for Brent {
             f_root = f(sd.root);
             sd.evaluation_number += 1;
         }
-       
+
         panic!(
             "Maximum number of function evaluations ({}) exceeded",
             self.max_evaluations()
@@ -171,12 +171,12 @@ mod test {
     fn test_brent_one() {
         let solver = Brent::new(0.0, 0.0, false, false);
         let name = "Brent";
-        
+
         let f1 = |x| x * x - 1.0;
         // guess on the left side of the root, increasing function
         test_not_bracketed(&solver, name, f1, 0.5);
         test_bracketed(&solver, name, f1, 0.5);
-        
+
         // guess on the right side of the root, increasing function
         test_not_bracketed(&solver, name, f1, 1.5);
         test_bracketed(&solver, name, f1, 1.5);
@@ -198,18 +198,18 @@ mod test {
         test_not_bracketed(&solver, name, f3, 1.00001);
     }
 
-    // Example is from <https://en.wikipedia.org/wiki/Brent%27s_method>
+    // This test is based on the example in <https://en.wikipedia.org/wiki/Brent%27s_method>
     #[test]
     fn test_brent_two() {
         let solver = Brent::new(0.0, 0.0, false, false);
         let name = "Brent";
-        
-        let f = |x: Real| (x + 3.0)*(x - 1.0) * (x - 1.0);
+
+        let f = |x: Real| (x + 3.0) * (x - 1.0) * (x - 1.0);
         // [-4, 4/3]
         let accuracy = 1.0e-8;
         let expected = -3.0;
 
-        let root = solver.solve_with_xmin_xmax(&f, accuracy, 0.5, -4.0, 4.0/3.0);
+        let root = solver.solve_with_xmin_xmax(&f, accuracy, 0.5, -4.0, 4.0 / 3.0);
         assert!(
             (root - expected).abs() <= accuracy,
             "{} solver (bracketed), expected: {}, calculated: {}, accuracy: {}",
@@ -217,9 +217,36 @@ mod test {
             expected,
             root,
             accuracy
-        );        
+        );
     }
-    
+
+    // This test is based on a case given in the following paper:
+    // Implementation of Brent-Dekker and A Better Root Finding Method and Brent-Dekker
+    // Method's Parallelization, Vakkalagadda Satya Sai Prakash
+    // <https://tinyurl.com/y3uc5rjn>
+    #[test]
+    fn test_brent_three() {
+        let solver = Brent::new(0.0, 0.0, false, false);
+        let name = "Brent";
+
+        let f = |x: Real| {
+            (x.exp() * x.cos()) - (x * x.sin())
+        };
+
+        let expected = 1.225393;
+        let accuracy = 1.0e-6;
+
+        let root = solver.solve_with_step(&f, accuracy, 1.0, 0.1);
+        assert!(
+            (root - expected).abs() <= accuracy,
+            "{} solver (bracketed), expected: {}, calculated: {}, accuracy: {}",
+            name,
+            expected,
+            root,
+            accuracy
+        );
+    }
+
     fn test_not_bracketed<S, F>(solver: &S, name: &str, f: F, guess: Real)
     where
         S: Solver1D,
