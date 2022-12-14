@@ -1,3 +1,4 @@
+use crate::maths::solvers1d::solver1d::private::SolverData;
 use crate::types::Real;
 
 use crate::maths::comparison::close;
@@ -20,64 +21,63 @@ pub trait Solver1D: private::SolverDetail {
         let growth_factor = 1.6;
         let mut flip_flop = -1;
 
-        let mut root = guess;
-        let mut fx_max = f(root);
-        let mut fx_min;
-        let mut xmin;
-        let mut xmax;
-
-        if close(fx_max, 0.0) {
-            return root;
-        } else if fx_max > 0.0 {
-            xmin = self.enforce_bounds(root - step);
-            fx_min = f(xmin);
-            xmax = root;
+        let mut sd = SolverData::default();
+        
+        sd.root = guess;
+        sd.fx_max = f(sd.root);
+        
+        if close(sd.fx_max, 0.0) {
+            return sd.root;
+        } else if sd.fx_max > 0.0 {
+            sd.xmin = self.enforce_bounds(sd.root - step);
+            sd.fx_min = f(sd.xmin);
+            sd.xmax = sd.root;
         } else {
-            xmin = root;
-            fx_min = fx_max;
-            xmax = self.enforce_bounds(root + step);
-            fx_max = f(xmax);
+            sd.xmin = sd.root;
+            sd.fx_min = sd.fx_max;
+            sd.xmax = self.enforce_bounds(sd.root + step);
+            sd.fx_max = f(sd.xmax);
         }
 
-        let mut evaluation_number = 2;
-        while evaluation_number < self.max_evaluations() {
-            if fx_min * fx_max <= 0.0 {
-                if close(fx_min, 0.0) {
-                    return xmin;
+        sd.evaluation_number = 2;
+        while sd.evaluation_number < self.max_evaluations() {
+            if sd.fx_min * sd.fx_max <= 0.0 {
+                if close(sd.fx_min, 0.0) {
+                    return sd.xmin;
                 }
-                if close(fx_max, 0.0) {
-                    return xmax;
+                if close(sd.fx_max, 0.0) {
+                    return sd.xmax;
                 }
-                root = (xmax + xmin) / 2.0;
-                return self.solve_impl(f, accuracy);
+                sd.root = (sd.xmax + sd.xmin) / 2.0;
+                return self.solve(f, accuracy, &mut sd);
             }
-            if fx_min.abs() < fx_max.abs() {
-                xmin = self.enforce_bounds(xmin + growth_factor * (xmin - xmax));
-                fx_min = f(xmin);
-            } else if fx_min.abs() > fx_max.abs() {
-                xmax = self.enforce_bounds(xmax + growth_factor * (xmax - xmin));
-                fx_max = f(xmax);
+            if sd.fx_min.abs() < sd.fx_max.abs() {
+                sd.xmin = self.enforce_bounds(sd.xmin + growth_factor * (sd.xmin - sd.xmax));
+                sd.fx_min = f(sd.xmin);
+            } else if sd.fx_min.abs() > sd.fx_max.abs() {
+                sd.xmax = self.enforce_bounds(sd.xmax + growth_factor * (sd.xmax - sd.xmin));
+                sd.fx_max = f(sd.xmax);
             } else if flip_flop == -1 {
-                xmin = self.enforce_bounds(xmin + growth_factor * (xmin - xmax));
-                fx_min = f(xmin);
-                evaluation_number += 1;
+                sd.xmin = self.enforce_bounds(sd.xmin + growth_factor * (sd.xmin - sd.xmax));
+                sd.fx_min = f(sd.xmin);
+                sd.evaluation_number += 1;
                 flip_flop = 1;
             } else if flip_flop == 1 {
-                xmax = self.enforce_bounds(xmax + growth_factor * (xmax - xmin));
-                fx_max = f(xmax);
+                sd.xmax = self.enforce_bounds(sd.xmax + growth_factor * (sd.xmax - sd.xmin));
+                sd.fx_max = f(sd.xmax);
                 flip_flop = -1;
             }
-            evaluation_number += 1;
+            sd.evaluation_number += 1;
         }
 
         panic!(
             "Unable to bracket root in {} function evaluations, (last bracket attempt: \
                 f[{}, {}] -> [{}, {}])",
             self.max_evaluations(),
-            xmin,
-            xmax,
-            fx_min,
-            fx_max
+            sd.xmin,
+            sd.xmax,
+            sd.fx_min,
+            sd.fx_max
         );
     }
 
@@ -93,8 +93,8 @@ pub trait Solver1D: private::SolverDetail {
         f: F,
         accuracy: Real,
         guess: Real,
-        xmin: Real,
-        xmax: Real,
+        _xmin: Real,
+        _xmax: Real,
     ) -> Real
     where
         F: Fn(Real) -> Real,
@@ -103,51 +103,55 @@ pub trait Solver1D: private::SolverDetail {
         // check whether we really want to use epsilon
         let accuracy = accuracy.max(f64::EPSILON);
 
-        let xmin = xmin;
-        let xmax = xmax;
-
+        let mut sd = SolverData {
+            xmin: _xmin,
+            xmax: _xmax,
+            ..Default::default()
+        };
+        
         assert!(
-            xmin < xmax,
+            sd.xmin < sd.xmax,
             "invalid range: xmin ({}) >= xmax ({})",
-            xmin,
-            xmax
+            sd.xmin,
+            sd.xmax
         );
         assert!(
-            self.lower_bound_enforced() || xmin >= self.lower_bound(),
+            self.lower_bound_enforced() || sd.xmin >= self.lower_bound(),
             "xmin ({}) < enforced lower bound ({})",
-            xmin,
+            sd.xmin,
             self.lower_bound()
         );
         assert!(
-            self.upper_bound_enforced() || xmax <= self.upper_bound(),
+            self.upper_bound_enforced() || sd.xmax <= self.upper_bound(),
             "xmax ({}) > enforced upper bound ({})",
-            xmax,
+            sd.xmax,
             self.upper_bound()
         );
 
-        let fx_min = f(xmin);
-        if close(fx_min, 0.0) {
-            return xmin;
+        sd.fx_min = f(sd.xmin);
+        if close(sd.fx_min, 0.0) {
+            return sd.xmin;
         }
-        let fx_max = f(xmax);
-        if close(fx_max, 0.0) {
-            return xmax;
+        sd.fx_max = f(sd.xmax);
+        if close(sd.fx_max, 0.0) {
+            return sd.xmax;
         }
 
+        sd.evaluation_number = 2;
+        
         assert!(
-            fx_min * fx_max < 0.0,
+            sd.fx_min * sd.fx_max < 0.0,
             "root not bracketed: f[{}, {}] -> [{}, {}]",
-            xmin,
-            xmax,
-            fx_min,
-            fx_max
+            sd.xmin,
+            sd.xmax,
+            sd.fx_min,
+            sd.fx_max
         );
-        assert!(guess > xmin, "guess ({}) < xmin ({})", guess, xmin);
-        assert!(guess < xmax, "guess ({}) > xmax ({})", guess, xmax);
+        assert!(guess > sd.xmin, "guess ({}) < xmin ({})", guess, sd.xmin);
+        assert!(guess < sd.xmax, "guess ({}) > xmax ({})", guess, sd.xmax);
 
-        // TODO
-        // let root = guess;
-        self.solve_impl(f, accuracy)
+        sd.root = guess;
+        self.solve(f, accuracy, &mut sd)
     }
 }
 
@@ -157,8 +161,23 @@ pub(crate) mod private {
     const MAX_FUNCTION_EVALUATIONS: Size = 100;
     use crate::types::{Real, Size};
 
+    #[derive(Clone, Copy, Default)]
+    pub struct SolverData {
+        pub root: Real,
+        pub xmin: Real,
+        pub xmax: Real,
+        pub fx_min: Real,
+        pub fx_max: Real,
+        pub evaluation_number: Size,
+    }
+
     pub trait SolverDetail {
-        fn solve_impl<F: Fn(Real) -> Real>(&self, f: F, accuracy: Real) -> Real;
+        fn solve<F: Fn(Real) -> Real>(
+            &self,
+            f: F,
+            accuracy: Real,
+            solver_data: &mut SolverData,
+        ) -> Real;
 
         fn max_evaluations(&self) -> Size {
             MAX_FUNCTION_EVALUATIONS
