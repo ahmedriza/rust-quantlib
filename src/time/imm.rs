@@ -226,7 +226,9 @@ impl IMM {
 
 #[cfg(test)]
 mod test {
-    use crate::time::{context::pricing_context::PricingContext, date::Date, imm::IMM, months::Month::*};
+    use crate::time::{
+        context::pricing_context::PricingContext, date::Date, imm::IMM, months::Month::*,
+    };
 
     #[test]
     fn test_is_imm_code() {

@@ -30,22 +30,6 @@ impl<'a> LagrangeInterpolation<'a> {
         result.update();
         result
     }
-
-    pub fn _value(&self, x: Real) -> Real {
-        let eps = 10.0 * f64::EPSILON * x.abs();
-        let lb = lower_bound(self.x, x - eps);
-        if lb != self.x.len() && self.x[lb] - x < eps {
-            return self.y[lb];
-        }
-        let mut n = 0.0;
-        let mut d = 0.0;
-        for i in 0..self.x.len() {
-            let alpha = self.lambda[i] / (x - self.x[i]);
-            n += alpha * self.y[i];
-            d += alpha;
-        }
-        n / d
-    }
 }
 
 impl<'a> Interpolation for LagrangeInterpolation<'a> {
@@ -98,7 +82,19 @@ impl<'a> Interpolation for LagrangeInterpolation<'a> {
 
     fn value_with_extrapolation(&self, x: Real, allow_extrapolation: bool) -> Real {
         self.check_range(x, allow_extrapolation);
-        self._value(x)
+        let eps = 10.0 * f64::EPSILON * x.abs();
+        let lb = lower_bound(self.x, x - eps);
+        if lb != self.x.len() && self.x[lb] - x < eps {
+            return self.y[lb];
+        }
+        let mut n = 0.0;
+        let mut d = 0.0;
+        for i in 0..self.x.len() {
+            let alpha = self.lambda[i] / (x - self.x[i]);
+            n += alpha * self.y[i];
+            d += alpha;
+        }
+        n / d
     }
 
     // TODO remove code duplication

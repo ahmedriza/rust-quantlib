@@ -104,10 +104,10 @@ mod test {
 
         assert_eq!(lin.primitive_const, vec![0.0, 15.0, 60.0, 92.5]);
         assert_eq!(lin.s, vec![10.0, 2.5, 15.0, 0.0]);
-        
+
         let x = 0.8;
         assert_eq!(lin.value(x), 18.0);
-        
+
         let x = 3.5;
         assert_eq!(lin.value(x), 32.5);
         assert_eq!(lin.primitive(x), 74.375);

@@ -2,7 +2,8 @@ use std::sync::Arc;
 
 use crate::time::{
     calendar::{Calendar, Holiday, Weekend},
-    weekday::Weekday, date::Date,
+    date::Date,
+    weekday::Weekday,
 };
 
 /// Calendar for reproducing theoretical calculations.

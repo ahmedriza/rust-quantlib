@@ -1,4 +1,4 @@
-use std::{sync::Arc, fmt::Debug};
+use std::{fmt::Debug, sync::Arc};
 
 use crate::types::{Integer, Time};
 

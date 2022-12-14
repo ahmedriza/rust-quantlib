@@ -3,7 +3,10 @@ use crate::time::{
     interestrate::InterestRate, period::Period,
 };
 
-use crate::{termstructures::termstructure::TermStructure, types::{DiscountFactor, Time}};
+use crate::{
+    termstructures::termstructure::TermStructure,
+    types::{DiscountFactor, Time},
+};
 
 /// Interest rate term structure
 pub trait YieldTermStructure: TermStructure {

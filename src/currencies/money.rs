@@ -13,9 +13,6 @@ pub struct Money {
 
 impl Money {
     pub fn new(currency: Rc<dyn Currency>, value: Decimal) -> Self {
-        Self {
-            value,
-            currency,
-        }
+        Self { value, currency }
     }
 }

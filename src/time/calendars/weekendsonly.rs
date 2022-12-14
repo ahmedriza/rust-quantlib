@@ -1,6 +1,10 @@
 use std::sync::Arc;
 
-use crate::time::{calendar::{Calendar, Holiday, Weekend, WesternWeekend}, date::Date, weekday::Weekday};
+use crate::time::{
+    calendar::{Calendar, Holiday, Weekend, WesternWeekend},
+    date::Date,
+    weekday::Weekday,
+};
 
 /// Weekends-only calendar
 ///

@@ -3,7 +3,9 @@ use std::sync::Arc;
 use crate::time::{
     calendar::easter_monday,
     calendar::{Calendar, Holiday, Weekend, WesternWeekend},
-    months::Month::*, date::Date, weekday::Weekday,
+    date::Date,
+    months::Month::*,
+    weekday::Weekday,
 };
 
 /// Swiss calendar

@@ -38,6 +38,7 @@ pub trait Interpolation {
     /// Maximum value of x
     fn xmax(&self) -> Real;
 
+    /// Return the interpolated value at `x`
     fn value(&self, x: Real) -> Real {
         self.value_with_extrapolation(x, false)
     }

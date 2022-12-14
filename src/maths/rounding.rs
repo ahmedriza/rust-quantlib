@@ -22,7 +22,7 @@ pub trait Rounding {
 /// The names of the Floor and Ceiling methods might be misleading. Check the provided reference.
 ///
 /// TODO use [enum_dispatch](https://gitlab.com/antonok/enum_dispatch/-/blob/master/README.md)
-/// to reduce boiler plate. 
+/// to reduce boiler plate.
 #[derive(Clone, PartialEq, Eq)]
 pub enum RoundingType {
     /// Does not perform any rounding

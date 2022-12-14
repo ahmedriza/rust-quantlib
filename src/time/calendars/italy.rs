@@ -2,8 +2,9 @@ use std::sync::Arc;
 
 use crate::time::{
     calendar::{easter_monday, Calendar, Holiday, Weekend, WesternWeekend},
+    date::Date,
     months::Month::*,
-    weekday::Weekday, date::Date,
+    weekday::Weekday,
 };
 
 #[derive(Clone)]
