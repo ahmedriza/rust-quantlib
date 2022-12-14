@@ -22,10 +22,10 @@ pub trait Solver1D: private::SolverDetail {
         let mut flip_flop = -1;
 
         let mut sd = SolverData::default();
-        
+
         sd.root = guess;
         sd.fx_max = f(sd.root);
-        
+
         if close(sd.fx_max, 0.0) {
             return sd.root;
         } else if sd.fx_max > 0.0 {
@@ -108,7 +108,7 @@ pub trait Solver1D: private::SolverDetail {
             xmax: _xmax,
             ..Default::default()
         };
-        
+
         assert!(
             sd.xmin < sd.xmax,
             "invalid range: xmin ({}) >= xmax ({})",
@@ -116,13 +116,13 @@ pub trait Solver1D: private::SolverDetail {
             sd.xmax
         );
         assert!(
-            self.lower_bound_enforced() || sd.xmin >= self.lower_bound(),
+            !self.lower_bound_enforced() || sd.xmin >= self.lower_bound(),
             "xmin ({}) < enforced lower bound ({})",
             sd.xmin,
             self.lower_bound()
         );
         assert!(
-            self.upper_bound_enforced() || sd.xmax <= self.upper_bound(),
+            !self.upper_bound_enforced() || sd.xmax <= self.upper_bound(),
             "xmax ({}) > enforced upper bound ({})",
             sd.xmax,
             self.upper_bound()
@@ -138,14 +138,15 @@ pub trait Solver1D: private::SolverDetail {
         }
 
         sd.evaluation_number = 2;
-        
+
         assert!(
             sd.fx_min * sd.fx_max < 0.0,
-            "root not bracketed: f[{}, {}] -> [{}, {}]",
+            "root not bracketed: f[{}, {}] -> [{}, {}], evaluations: {}",
             sd.xmin,
             sd.xmax,
             sd.fx_min,
-            sd.fx_max
+            sd.fx_max,
+            sd.evaluation_number
         );
         assert!(guess > sd.xmin, "guess ({}) < xmin ({})", guess, sd.xmin);
         assert!(guess < sd.xmax, "guess ({}) > xmax ({})", guess, sd.xmax);

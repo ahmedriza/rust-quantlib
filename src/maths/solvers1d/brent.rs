@@ -33,7 +33,6 @@ impl Brent {
 impl Solver1D for Brent {}
 
 impl private::SolverDetail for Brent {
-    #[allow(unused)]
     /// The implementation of the algorithm was inspired by Press, Teukolsky, Vetterling, and
     /// Flannery, "Numerical Recipes in C", 2nd edition, Cambridge University Press
     fn solve<F: Fn(Real) -> Real>(&self, f: F, accuracy: Real, sd: &mut SolverData) -> Real {
@@ -127,7 +126,7 @@ impl private::SolverDetail for Brent {
             f_root = f(sd.root);
             sd.evaluation_number += 1;
         }
-
+       
         panic!(
             "Maximum number of function evaluations ({}) exceeded",
             self.max_evaluations()
@@ -164,14 +163,101 @@ fn sign(a: Real, b: Real) -> Real {
 #[allow(unused)]
 #[cfg(test)]
 mod test {
-    use crate::maths::solvers1d::solver1d::Solver1D;
+    use crate::{maths::solvers1d::solver1d::Solver1D, types::Real};
 
     use super::Brent;
 
     #[test]
-    fn test_brent() {
-        let solver1d = Brent::new(-10.0, 10.0, false, false);
-        // TODO
-        // solver1d.solve_with_step(f, accuracy, guess, step);
+    fn test_brent_one() {
+        let solver = Brent::new(0.0, 0.0, false, false);
+        let name = "Brent";
+        
+        let f1 = |x| x * x - 1.0;
+        // guess on the left side of the root, increasing function
+        test_not_bracketed(&solver, name, f1, 0.5);
+        test_bracketed(&solver, name, f1, 0.5);
+        
+        // guess on the right side of the root, increasing function
+        test_not_bracketed(&solver, name, f1, 1.5);
+        test_bracketed(&solver, name, f1, 1.5);
+
+        let f2 = |x| 1.0 - x * x;
+        // guess on the left side of the root, decreasing function
+        test_not_bracketed(&solver, name, f2, 0.5);
+        test_bracketed(&solver, name, f2, 0.5);
+
+        // guess on the right side of the root, decreasing function
+        test_not_bracketed(&solver, name, f2, 1.5);
+        test_bracketed(&solver, name, f2, 1.5);
+
+        let f3 = |x: Real| (x - 1.0).atan();
+        // situation where bisection is used in the finite difference
+        // newton solver as the first step and where the initial
+        // guess is equal to the next estimate (which causes an infinite
+        // derivative if we do not handle this case with special care)
+        test_not_bracketed(&solver, name, f3, 1.00001);
+    }
+
+    // Example is from <https://en.wikipedia.org/wiki/Brent%27s_method>
+    #[test]
+    fn test_brent_two() {
+        let solver = Brent::new(0.0, 0.0, false, false);
+        let name = "Brent";
+        
+        let f = |x: Real| (x + 3.0)*(x - 1.0) * (x - 1.0);
+        // [-4, 4/3]
+        let accuracy = 1.0e-8;
+        let expected = -3.0;
+
+        let root = solver.solve_with_xmin_xmax(&f, accuracy, 0.5, -4.0, 4.0/3.0);
+        assert!(
+            (root - expected).abs() <= accuracy,
+            "{} solver (bracketed), expected: {}, calculated: {}, accuracy: {}",
+            name,
+            expected,
+            root,
+            accuracy
+        );        
+    }
+    
+    fn test_not_bracketed<S, F>(solver: &S, name: &str, f: F, guess: Real)
+    where
+        S: Solver1D,
+        F: Fn(Real) -> Real,
+    {
+        let accuracies = vec![1.0e-4, 1.0e-6, 1.0e-8];
+        let expected = 1.0;
+        for accuracy in accuracies {
+            let root = solver.solve_with_step(&f, accuracy, guess, 0.1);
+            assert!(
+                (root - expected).abs() <= accuracy,
+                "{} solver (not bracketed), expected: {}, calculated: {}, accuracy: {}",
+                name,
+                expected,
+                root,
+                accuracy
+            );
+        }
+    }
+
+    fn test_bracketed<S, F>(solver: &S, name: &str, f: F, guess: Real)
+    where
+        S: Solver1D,
+        F: Fn(Real) -> Real,
+    {
+        let accuracies = vec![1.0e-4, 1.0e-6, 1.0e-8];
+        let expected = 1.0;
+        for accuracy in accuracies {
+            // guess on the left side of the root, increasing function
+            let root = solver.solve_with_xmin_xmax(&f, accuracy, guess, 0.0, 2.0);
+            assert!(
+                (root - expected).abs() <= accuracy,
+                "{} solver (bracketed), expected: {}, calculated: {}, accuracy: {}",
+                name,
+                expected,
+                root,
+                accuracy
+            );
+        }
     }
 }
