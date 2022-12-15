@@ -636,7 +636,14 @@ mod test {
         assert_eq!(d - p, Date::new(1, Month::January, 1998));
     }
 
-    #[allow(unused)]
+    #[test]
+    fn test_days_between() {
+        let d1 = Date::new(1, Month::January, 2022);
+        let d2 = Date::new(1, Month::December, 2022);
+        let days = Date::days_between(&d1, &d2);
+        assert_eq!(days, 334.0);
+    }
+    
     #[test]
     fn test_consistency() {
         let min_date = Date::min_date().serial_number() + 1;
