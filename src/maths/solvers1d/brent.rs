@@ -35,7 +35,7 @@ impl Solver1D for Brent {}
 impl private::SolverDetail for Brent {
     /// The implementation of the algorithm was inspired by Press, Teukolsky, Vetterling, and
     /// Flannery, "Numerical Recipes in C", 2nd edition, Cambridge University Press
-    fn solve<F: Fn(Real) -> Real>(&self, f: F, accuracy: Real, sd: &mut SolverData) -> Real {
+    fn solve_impl<F: Fn(Real) -> Real>(&self, f: F, accuracy: Real, sd: &mut SolverData) -> Real {
         // we want to start with root (which equals the guess) on one side of the bracket and both
         // xmin and xmax on the other.
         let mut f_root = f(sd.root);
@@ -235,7 +235,7 @@ mod test {
     {
         let accuracies = vec![1.0e-4, 1.0e-6, 1.0e-8];
         for accuracy in accuracies {
-            let root = solver.solve_with_step(&f, accuracy, guess, 0.1);
+            let root = solver.solve(&f, accuracy, guess, 0.1);
             assert!(
                 (root - expected).abs() <= accuracy,
                 "{} solver (not bracketed), expected: {}, calculated: {}, accuracy: {}",
@@ -263,7 +263,7 @@ mod test {
         let accuracies = vec![1.0e-4, 1.0e-6, 1.0e-8];
         for accuracy in accuracies {
             // guess on the left side of the root, increasing function
-            let root = solver.solve_with_xmin_xmax(&f, accuracy, guess, xmin, xmax);
+            let root = solver.solve_bracketed(&f, accuracy, guess, xmin, xmax);
             assert!(
                 (root - expected).abs() <= accuracy,
                 "{} solver (bracketed), expected: {}, calculated: {}, accuracy: {}",

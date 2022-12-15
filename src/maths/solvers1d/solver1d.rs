@@ -10,7 +10,13 @@ pub trait Solver1D: private::SolverDetail {
     ///
     /// This method contains a bracketing routine to which an initial guess must be supplied as
     /// well as a step used to scan the range of the possible bracketing values.
-    fn solve_with_step<F>(&self, f: F, accuracy: Real, guess: Real, step: Real) -> Real
+    ///
+    /// # Arguments
+    /// 
+    /// * `f` - function that we need to solve
+    /// * `guess` - initial guess
+    /// * `step` - step used to increase or decrease the guess at each iteration
+    fn solve<F>(&self, f: F, accuracy: Real, guess: Real, step: Real) -> Real
     where
         F: Fn(Real) -> Real,
     {
@@ -49,7 +55,7 @@ pub trait Solver1D: private::SolverDetail {
                     return sd.xmax;
                 }
                 sd.root = (sd.xmax + sd.xmin) / 2.0;
-                return self.solve(f, accuracy, &mut sd);
+                return self.solve_impl(f, accuracy, &mut sd);
             }
             if sd.fx_min.abs() < sd.fx_max.abs() {
                 sd.xmin = self.enforce_bounds(sd.xmin + growth_factor * (sd.xmin - sd.xmax));
@@ -88,13 +94,21 @@ pub trait Solver1D: private::SolverDetail {
     /// An initial guess must be supplied, as well as two values `xmin` and `xmax` which must
     /// bracket the zero (i.e., either `f(xmin) ≤ 0 ≤ f(xmax)`, or `f(xmax) ≤ 0 ≤ f(xmin)`
     /// must be true).
-    fn solve_with_xmin_xmax<F>(
+    ///
+    /// # Arguments
+    /// 
+    /// * `f` - function that we need to solve
+    /// * `accuracy` - required accuracy
+    /// * `guess` - initial guess
+    /// * `xmin` - minimum value of `x` for bracketing
+    /// * `xmax` - maximum value of `x` for bracketing 
+    fn solve_bracketed<F>(
         &self,
         f: F,
         accuracy: Real,
         guess: Real,
-        _xmin: Real,
-        _xmax: Real,
+        xmin: Real,
+        xmax: Real,
     ) -> Real
     where
         F: Fn(Real) -> Real,
@@ -104,8 +118,8 @@ pub trait Solver1D: private::SolverDetail {
         let accuracy = accuracy.max(f64::EPSILON);
 
         let mut sd = SolverData {
-            xmin: _xmin,
-            xmax: _xmax,
+            xmin,
+            xmax,
             ..Default::default()
         };
 
@@ -152,7 +166,7 @@ pub trait Solver1D: private::SolverDetail {
         assert!(guess < sd.xmax, "guess ({}) > xmax ({})", guess, sd.xmax);
 
         sd.root = guess;
-        self.solve(f, accuracy, &mut sd)
+        self.solve_impl(f, accuracy, &mut sd)
     }
 }
 
@@ -173,7 +187,7 @@ pub(crate) mod private {
     }
 
     pub trait SolverDetail {
-        fn solve<F: Fn(Real) -> Real>(
+        fn solve_impl<F: Fn(Real) -> Real>(
             &self,
             f: F,
             accuracy: Real,

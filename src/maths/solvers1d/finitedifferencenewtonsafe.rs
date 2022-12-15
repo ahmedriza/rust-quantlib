@@ -2,7 +2,7 @@ use crate::types::Real;
 
 use super::solver1d::{Solver1D, private};
 
-/// Safe Newton 1-D solver with finite difference derivatives
+/// Safe (bracketed) Newton 1-D solver with finite difference derivatives
 pub struct FiniteDifferenceNewtonSafe {
     lower_bound: Real,
     upper_bound: Real,
@@ -30,7 +30,7 @@ impl FiniteDifferenceNewtonSafe {
 impl Solver1D for FiniteDifferenceNewtonSafe {}
 
 impl private::SolverDetail for FiniteDifferenceNewtonSafe {
-    fn solve<F: Fn(Real) -> Real>(
+    fn solve_impl<F: Fn(Real) -> Real>(
             &self,
             f: F,
             accuracy: Real,

@@ -1,8 +1,18 @@
 #![allow(clippy::needless_doctest_main)]
 //!
-//! QuantLib implementation in Rust
+//! This is a pure Rust implementation of
+//! [QuantLib](https://www.quantlib.org/).  We have tried to follow Rust idioms as much as possible.
 //!
-//! A bond pricing example:
+//! We plan to provide Python and R bindings to the library in due course. 
+//!
+//! # Example
+//! 
+//! The following demonstrates an example of using the library for pricing bonds. More examples
+//! can be found in the [examples](https://github.com/ahmedriza/rust-quantlib/tree/master/examples)
+//! directory of the source. We will add more examples there as work on the library progresses. 
+//!
+//! See [C++ Bond Example](<https://github.com/lballabio/QuantLib/blob/master/Examples/Bonds/Bonds.cpp>)
+//! for the original QuantLib C++ version of the following example.
 //!
 //! ```no_run
 //! use rust_quantlib::quotes::simplequote::SimpleQuote;
@@ -21,7 +31,7 @@
 //!
 //!     let todays_date =
 //!         calendar.advance_by_days_with_following(settlement_date, -fixing_days, Days, false);
-//!     // set evaluation date
+//!     // set evaluation date. Note that this is not a global but a local context. 
 //!     let pricing_context = PricingContext::new(todays_date);
 //!
 //!     println!("Today: {:?}, {:?}", todays_date.weekday(), todays_date);
@@ -34,13 +44,9 @@
 //!     // Building of the bonds discounting yield curve
 //!
 //!     // ZC rates for the short end
-//!     let zc_3m_quote = 0.0096;
-//!     let zc_6m_quote = 0.0145;
-//!     let zc_1y_quote = 0.0194;
-//!
-//!     let zc_3m_rate = SimpleQuote::new(zc_3m_quote);
-//!     let zc_6m_rate = SimpleQuote::new(zc_6m_quote);
-//!     let zc_1y_rate = SimpleQuote::new(zc_1y_quote);
+//!     let zc_3m_rate = SimpleQuote::new(0.0096);
+//!     let zc_6m_rate = SimpleQuote::new(0.0145);
+//!     let zc_1y_rate = SimpleQuote::new(0.0194);
 //!
 //!     // TODO
 //!}
