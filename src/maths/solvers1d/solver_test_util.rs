@@ -34,15 +34,15 @@ pub(crate) fn test_solver<S>(
     test_not_bracketed(solver, name, &f3, 1.00001, expected);
 
     // This test is based on the example in <https://en.wikipedia.org/wiki/Brent%27s_method>
-    let f = |x: Real| (x + 3.0) * (x - 1.0) * (x - 1.0);
-    test_bracketed(solver, name, &f, 0.5, -4.0, 4.0 / 3.0, -3.0);
+    let f4 = |x: Real| (x + 3.0) * (x - 1.0) * (x - 1.0);
+    test_bracketed(solver, name, &f4, 0.5, -4.0, 4.0 / 3.0, -3.0);
 
     // This test is based on a case given in the following paper:
     // Implementation of Brent-Dekker and A Better Root Finding Method and Brent-Dekker
     // Method's Parallelization, Vakkalagadda Satya Sai Prakash
     // <https://tinyurl.com/y3uc5rjn>
-    let f = |x: Real| (x.exp() * x.cos()) - (x * x.sin());
-    test_not_bracketed(solver, name, &f, 1.0, 1.22539378412362);
+    let f5 = |x: Real| (x.exp() * x.cos()) - (x * x.sin());
+    test_not_bracketed(solver, name, &f5, 1.0, 1.22539378412362);
 }
 
 pub(crate) fn test_not_bracketed<S, F>(solver: &S, name: &str, f: &F, guess: Real, expected: Real)
