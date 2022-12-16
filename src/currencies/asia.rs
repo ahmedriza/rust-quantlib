@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use crate::maths::rounding::RoundingType;
+use crate::maths::rounding::Rounding;
 
 use crate::currencies::currency::{Currency, CurrencyData};
 
@@ -21,7 +21,7 @@ impl CNYCurrency {
                 "Y".to_string(),
                 "".to_string(),
                 100,
-                RoundingType::none(),
+                Rounding::none(),
                 None,
                 HashSet::new(),
             ),
@@ -60,7 +60,7 @@ impl HKDCurrency {
                 "HK$".to_string(),
                 "".to_string(),
                 100,
-                RoundingType::none(),
+                Rounding::none(),
                 None,
                 HashSet::new(),
             ),
@@ -99,7 +99,7 @@ impl JPYCurrency {
                 "\u{00A5}".to_string(),
                 "".to_string(),
                 100,
-                RoundingType::none(),
+                Rounding::none(),
                 None,
                 HashSet::new(),
             ),
@@ -138,7 +138,7 @@ impl KRWCurrency {
                 "W".to_string(),
                 "".to_string(),
                 100,
-                RoundingType::none(),
+                Rounding::none(),
                 None,
                 HashSet::new(),
             ),
@@ -177,7 +177,7 @@ impl SARCurrency {
                 "SRls".to_string(),
                 "".to_string(),
                 100,
-                RoundingType::none(),
+                Rounding::none(),
                 None,
                 HashSet::new(),
             ),
@@ -216,7 +216,7 @@ impl SGDCurrency {
                 "S$".to_string(),
                 "".to_string(),
                 100,
-                RoundingType::none(),
+                Rounding::none(),
                 None,
                 HashSet::new(),
             ),
@@ -255,7 +255,7 @@ impl CNHCurrency {
                 "CNH".to_string(),
                 "".to_string(),
                 100,
-                RoundingType::none(),
+                Rounding::none(),
                 None,
                 HashSet::new(),
             ),

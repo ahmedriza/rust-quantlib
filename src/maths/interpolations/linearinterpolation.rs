@@ -89,10 +89,7 @@ impl<'a> Interpolation for LinearInterpolation<'a> {
 
 #[cfg(test)]
 mod test {
-    use crate::maths::{
-        interpolations::interpolation::Interpolation,
-        rounding::{Rounding, RoundingType},
-    };
+    use crate::maths::{interpolations::interpolation::Interpolation, rounding::Rounding};
 
     use super::LinearInterpolation;
 
@@ -123,7 +120,7 @@ mod test {
         let lin = LinearInterpolation::new(&x, &y);
         let x = 251.0;
         // 890.3614457831326
-        let rounding = RoundingType::closest(2, 5);
+        let rounding = Rounding::closest(2, 5);
         assert_eq!(rounding.round(lin.value(x)), 890.36);
         // 142844.81325301205
         assert_eq!(rounding.round(lin.primitive(x)), 142844.81);

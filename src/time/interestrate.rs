@@ -233,7 +233,7 @@ impl InterestRate {
 
 #[cfg(test)]
 mod test {
-    use crate::maths::rounding::{Rounding, RoundingType};
+    use crate::maths::rounding::Rounding;
     use crate::types::{Rate, Size, Time};
 
     use crate::time::{
@@ -602,7 +602,7 @@ mod test {
             );
             let expected_ir =
                 InterestRate::new(i.expected, ir.daycounter.clone(), i.comp2, i.freq2);
-            let rounding = RoundingType::closest(i.precision as i32, 5);
+            let rounding = Rounding::closest(i.precision as i32, 5);
             let r3 = rounding.round(ir3.rate);
             let error = (r3 - expected_ir.rate).abs();
             assert!(

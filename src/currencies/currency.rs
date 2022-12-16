@@ -1,6 +1,6 @@
 use std::{collections::HashSet, fmt::Debug, rc::Rc};
 
-use crate::maths::rounding::RoundingType;
+use crate::maths::rounding::Rounding;
 use crate::types::Integer;
 
 /// Currency specification
@@ -36,7 +36,7 @@ pub trait Currency: Debug {
     }
 
     /// Rounding convention
-    fn rounding(&self) -> RoundingType {
+    fn rounding(&self) -> Rounding {
         self.data().rounding.clone()
     }
 
@@ -77,7 +77,7 @@ pub struct CurrencyData {
     pub fractions_per_unit: Integer,
 
     /// Rounding convention
-    pub rounding: RoundingType,
+    pub rounding: Rounding,
 
     /// Currency used for triangulated exchange when required
     pub triangulation_currency: Option<Rc<CurrencyData>>,
@@ -107,7 +107,7 @@ impl CurrencyData {
         symbol: String,
         fraction_symbol: String,
         fractions_per_unit: Integer,
-        rounding: RoundingType,
+        rounding: Rounding,
         triangulation_currency: Option<Rc<CurrencyData>>,
         minor_unit_codes: HashSet<String>,
     ) -> Self {

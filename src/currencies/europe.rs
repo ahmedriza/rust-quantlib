@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use crate::maths::rounding::RoundingType;
+use crate::maths::rounding::Rounding;
 
 use crate::currencies::currency::{Currency, CurrencyData};
 
@@ -21,7 +21,7 @@ impl CHFCurrency {
                 "SwF".to_string(),
                 "".to_string(),
                 100,
-                RoundingType::none(),
+                Rounding::none(),
                 None,
                 HashSet::new(),
             ),
@@ -60,7 +60,7 @@ impl EURCurrency {
                 "\u{20ac}".to_string(),
                 "".to_string(),
                 100,
-                RoundingType::closest(2, 5),
+                Rounding::closest(2, 5),
                 None,
                 HashSet::new(),
             ),
@@ -99,7 +99,7 @@ impl GBPCurrency {
                 "\u{00A3}".to_string(),
                 "p".to_string(),
                 100,
-                RoundingType::none(),
+                Rounding::none(),
                 None,
                 HashSet::new(),
             ),
@@ -138,7 +138,7 @@ impl NOKCurrency {
                 "NKr".to_string(),
                 "".to_string(),
                 100,
-                RoundingType::none(),
+                Rounding::none(),
                 None,
                 HashSet::new(),
             ),
@@ -177,7 +177,7 @@ impl SEKCurrency {
                 "kr".to_string(),
                 "".to_string(),
                 100,
-                RoundingType::none(),
+                Rounding::none(),
                 None,
                 HashSet::new(),
             ),

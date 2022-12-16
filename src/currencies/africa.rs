@@ -1,6 +1,6 @@
 use std::collections::HashSet;
 
-use crate::maths::rounding::RoundingType;
+use crate::maths::rounding::Rounding;
 
 use crate::currencies::currency::{Currency, CurrencyData};
 
@@ -21,7 +21,7 @@ impl ZARCurrency {
                 "R".to_string(),
                 "".to_string(),
                 100,
-                RoundingType::none(),
+                Rounding::none(),
                 None,
                 HashSet::new(),
             ),

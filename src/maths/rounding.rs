@@ -1,12 +1,5 @@
 use crate::types::{Decimal, Integer};
 
-pub trait Rounding {
-    /// Perform rounding
-    fn round(&self, value: Decimal) -> Decimal;
-}
-
-// -------------------------------------------------------------------------------------------------
-
 #[derive(Clone, PartialEq, Eq)]
 pub struct NoRounding {}
 
@@ -64,7 +57,7 @@ pub struct FloorTruncation {
 /// TODO use [enum_dispatch](https://gitlab.com/antonok/enum_dispatch/-/blob/master/README.md)
 /// to reduce boiler plate.
 #[derive(Clone, PartialEq, Eq)]
-pub enum RoundingType {
+pub enum Rounding {
     /// Does not perform any rounding
     NoRounding(NoRounding),
 
@@ -92,60 +85,57 @@ pub enum RoundingType {
 
 // -------------------------------------------------------------------------------------------------
 
-impl RoundingType {
+impl Rounding {
+    /// Round `value` according to the chosen rounding rule
+    pub fn round(&self, value: Decimal) -> Decimal {
+        match self {
+            Rounding::NoRounding(_) => value,
+            Rounding::UpRounding(r) => r.data.round(value, self),
+            Rounding::DownRounding(r) => r.data.round(value, self),
+            Rounding::ClosestRounding(r) => r.data.round(value, self),
+            Rounding::CeilingTruncation(r) => r.data.round(value, self),
+            Rounding::FloorTruncation(r) => r.data.round(value, self),
+        }
+    }
+
     /// Return an instance [RoundingType::NoRounding]
-    pub fn none() -> RoundingType {
-        RoundingType::NoRounding(NoRounding {})
+    pub fn none() -> Rounding {
+        Rounding::NoRounding(NoRounding {})
     }
 
     /// Return an instance [RoundingType::UpRounding]
-    pub fn up(precision: Integer, digit: Integer) -> RoundingType {
-        RoundingType::UpRounding(UpRounding {
+    pub fn up(precision: Integer, digit: Integer) -> Rounding {
+        Rounding::UpRounding(UpRounding {
             data: RoundingData::new(precision, digit),
         })
     }
 
     /// Return an instance [RoundingType::DownRounding]    
-    pub fn down(precision: Integer, digit: Integer) -> RoundingType {
-        RoundingType::DownRounding(DownRounding {
+    pub fn down(precision: Integer, digit: Integer) -> Rounding {
+        Rounding::DownRounding(DownRounding {
             data: RoundingData::new(precision, digit),
         })
     }
 
     /// Return an instance [RoundingType::ClosestRounding]    
-    pub fn closest(precision: Integer, digit: Integer) -> RoundingType {
-        RoundingType::ClosestRounding(ClosestRounding {
+    pub fn closest(precision: Integer, digit: Integer) -> Rounding {
+        Rounding::ClosestRounding(ClosestRounding {
             data: RoundingData::new(precision, digit),
         })
     }
 
     /// Return an instance [RoundingType::CeilingTruncation]        
-    pub fn ceiling(precision: Integer, digit: Integer) -> RoundingType {
-        RoundingType::CeilingTruncation(CeilingTruncation {
+    pub fn ceiling(precision: Integer, digit: Integer) -> Rounding {
+        Rounding::CeilingTruncation(CeilingTruncation {
             data: RoundingData::new(precision, digit),
         })
     }
 
     /// Return an instance [RoundingType::FloorTruncation]            
-    pub fn floor(precision: Integer, digit: Integer) -> RoundingType {
-        RoundingType::FloorTruncation(FloorTruncation {
+    pub fn floor(precision: Integer, digit: Integer) -> Rounding {
+        Rounding::FloorTruncation(FloorTruncation {
             data: RoundingData::new(precision, digit),
         })
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-
-impl Rounding for RoundingType {
-    fn round(&self, value: Decimal) -> Decimal {
-        match self {
-            RoundingType::NoRounding(_) => value,
-            RoundingType::UpRounding(r) => r.data.round(value, self),
-            RoundingType::DownRounding(r) => r.data.round(value, self),
-            RoundingType::ClosestRounding(r) => r.data.round(value, self),
-            RoundingType::CeilingTruncation(r) => r.data.round(value, self),
-            RoundingType::FloorTruncation(r) => r.data.round(value, self),
-        }
     }
 }
 
@@ -162,31 +152,31 @@ impl RoundingData {
         Self { precision, digit }
     }
 
-    fn round(&self, value: Decimal, rounding: &RoundingType) -> Decimal {
+    fn round(&self, value: Decimal, rounding: &Rounding) -> Decimal {
         let mult = 10_f64.powf(self.precision as f64);
         let mut lvalue = value.abs() * mult;
         let mod_val = lvalue.fract();
         lvalue -= mod_val;
 
         match rounding {
-            RoundingType::NoRounding(_) => {}
-            RoundingType::UpRounding(_) => {
+            Rounding::NoRounding(_) => {}
+            Rounding::UpRounding(_) => {
                 if mod_val != 0.0 {
                     lvalue += 1.0;
                 }
             }
-            RoundingType::DownRounding(_) => {}
-            RoundingType::ClosestRounding(_) => {
+            Rounding::DownRounding(_) => {}
+            Rounding::ClosestRounding(_) => {
                 if mod_val >= self.digit as f64 / 10.0 {
                     lvalue += 1.0;
                 }
             }
-            RoundingType::CeilingTruncation(_) => {
+            Rounding::CeilingTruncation(_) => {
                 if (value < 0.0) && mod_val >= self.digit as f64 / 10.0 {
                     lvalue += 1.0;
                 }
             }
-            RoundingType::FloorTruncation(_) => {
+            Rounding::FloorTruncation(_) => {
                 if (value >= 0.0) && mod_val >= self.digit as f64 / 10.0 {
                     lvalue += 1.0;
                 }
@@ -206,32 +196,29 @@ impl RoundingData {
 mod test {
     use crate::types::{Decimal, Integer};
 
-    use crate::maths::{
-        comparison::close_n,
-        rounding::{Rounding, RoundingType},
-    };
+    use crate::maths::{comparison::close_n, rounding::Rounding};
 
     #[test]
     fn test_round__() {
         let value = 11.2;
 
-        let rounding = RoundingType::up(0, 1);
+        let rounding = Rounding::up(0, 1);
         let r = rounding.round(value);
         assert_eq!(r, 12.0);
 
-        let rounding = RoundingType::down(0, 1);
+        let rounding = Rounding::down(0, 1);
         let r = rounding.round(value);
         assert_eq!(r, 11.0);
 
-        let rounding = RoundingType::closest(0, 1);
+        let rounding = Rounding::closest(0, 1);
         let r = rounding.round(value);
         assert_eq!(r, 12.0);
 
-        let rounding = RoundingType::ceiling(0, 1);
+        let rounding = Rounding::ceiling(0, 1);
         let r = rounding.round(value);
         assert_eq!(r, 11.0);
 
-        let rounding = RoundingType::floor(0, 1);
+        let rounding = Rounding::floor(0, 1);
         let r = rounding.round(value);
         assert_eq!(r, 12.0);
     }
@@ -240,23 +227,23 @@ mod test {
     fn test_round() {
         let value = 11.2;
 
-        let rounding = RoundingType::up(0, 1);
+        let rounding = Rounding::up(0, 1);
         let r = rounding.round(value);
         assert_eq!(r, 12.0);
 
-        let rounding = RoundingType::down(0, 1);
+        let rounding = Rounding::down(0, 1);
         let r = rounding.round(value);
         assert_eq!(r, 11.0);
 
-        let rounding = RoundingType::closest(0, 1);
+        let rounding = Rounding::closest(0, 1);
         let r = rounding.round(value);
         assert_eq!(r, 12.0);
 
-        let rounding = RoundingType::ceiling(0, 1);
+        let rounding = Rounding::ceiling(0, 1);
         let r = rounding.round(value);
         assert_eq!(r, 11.0);
 
-        let rounding = RoundingType::floor(0, 1);
+        let rounding = Rounding::floor(0, 1);
         let r = rounding.round(value);
         assert_eq!(r, 12.0);
     }
@@ -265,7 +252,7 @@ mod test {
     fn test_closest() {
         let test_data = make_test_data();
         for i in test_data {
-            let rouding = RoundingType::closest(i.precision, 5);
+            let rouding = Rounding::closest(i.precision, 5);
             let calculated = rouding.round(i.x);
             let expected = i.closest;
             assert!(
@@ -282,7 +269,7 @@ mod test {
     fn test_up() {
         let test_data = make_test_data();
         for i in test_data {
-            let rouding = RoundingType::up(i.precision, 5);
+            let rouding = Rounding::up(i.precision, 5);
             let calculated = rouding.round(i.x);
             let expected = i.up;
             assert!(
@@ -299,7 +286,7 @@ mod test {
     fn test_down() {
         let test_data = make_test_data();
         for i in test_data {
-            let rouding = RoundingType::down(i.precision, 5);
+            let rouding = Rounding::down(i.precision, 5);
             let calculated = rouding.round(i.x);
             let expected = i.down;
             assert!(
@@ -316,7 +303,7 @@ mod test {
     fn test_floor() {
         let test_data = make_test_data();
         for i in test_data {
-            let rouding = RoundingType::floor(i.precision, 5);
+            let rouding = Rounding::floor(i.precision, 5);
             let calculated = rouding.round(i.x);
             let expected = i.floor;
             assert!(
@@ -333,7 +320,7 @@ mod test {
     fn test_ceiling() {
         let test_data = make_test_data();
         for i in test_data {
-            let rouding = RoundingType::ceiling(i.precision, 5);
+            let rouding = Rounding::ceiling(i.precision, 5);
             let calculated = rouding.round(i.x);
             let expected = i.ceiling;
             assert!(
