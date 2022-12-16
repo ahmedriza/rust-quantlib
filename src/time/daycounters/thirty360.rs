@@ -81,18 +81,6 @@ impl Thirty360 {
     }
 }
 
-pub enum Convention {
-    USA,
-    BondBasis,
-    European,
-    EurobondBasis,
-    Italian,
-    German,
-    ISMA,
-    ISDA,
-    NASD,
-}
-
 trait DayCounterDetailThirty360: DayCounterDetail {
     fn year_fraction(
         &self,
