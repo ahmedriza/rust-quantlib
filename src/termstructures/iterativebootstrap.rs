@@ -1,4 +1,3 @@
-
 /// Universal piecewise-term-structure boostrapper
 pub struct IterativeBootstrap {
     //

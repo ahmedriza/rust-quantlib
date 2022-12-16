@@ -14,13 +14,20 @@ use super::{
     },
 };
 
+/// Day count conventions
 #[derive(Clone, Copy)]
 pub enum DayCounter {
+    /// Actual/360 day count convention, also known as "Act/360", or "A/360".
     Actual360(Actual360),
+    /// Actual/366 day count convention, also known as "Act/366".
     Actual366(Actual366),
+    /// 1/1 day count convention
     One(One),
+    /// Simple day counter for reproducing theoretical calculations.
     Simple(Simple),
+    /// 30/360 day count convention
     Thirty360(Thirty360),
+    /// 30/365 day count convention
     Thirty365(Thirty365),
 }
 
