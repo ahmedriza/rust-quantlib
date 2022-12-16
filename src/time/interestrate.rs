@@ -32,8 +32,9 @@ impl InterestRate {
         {
             assert!(
                 frequency != Frequency::Once && frequency != Frequency::NoFrequency,
-                "frequency {:?} not allowed for this interest rate",
-                frequency
+                "frequency {:?} not allowed for this interest rate compounding {:?}",
+                frequency,
+                compounding
             );
             (true, frequency.into())
         } else {
