@@ -3,13 +3,13 @@
 //! This is a pure Rust implementation of
 //! [QuantLib](https://www.quantlib.org/).  We have tried to follow Rust idioms as much as possible.
 //!
-//! We plan to provide Python and R bindings to the library in due course. 
+//! We plan to provide Python and R bindings to the library in due course.
 //!
 //! # Example
-//! 
+//!
 //! The following demonstrates an example of using the library for pricing bonds. More examples
 //! can be found in the [examples](https://github.com/ahmedriza/rust-quantlib/tree/master/examples)
-//! directory of the source. We will add more examples there as work on the library progresses. 
+//! directory of the source. We will add more examples there as work on the library progresses.
 //!
 //! See [C++ Bond Example](<https://github.com/lballabio/QuantLib/blob/master/Examples/Bonds/Bonds.cpp>)
 //! for the original QuantLib C++ version of the following example.
@@ -31,7 +31,7 @@
 //!
 //!     let todays_date =
 //!         calendar.advance_by_days_with_following(settlement_date, -fixing_days, Days, false);
-//!     // set evaluation date. Note that this is not a global but a local context. 
+//!     // set evaluation date. Note that this is not a global but a local context.
 //!     let pricing_context = PricingContext::new(todays_date);
 //!
 //!     println!("Today: {:?}, {:?}", todays_date.weekday(), todays_date);

@@ -643,7 +643,7 @@ mod test {
         let days = Date::days_between(&d1, &d2);
         assert_eq!(days, 334.0);
     }
-    
+
     #[test]
     fn test_consistency() {
         let min_date = Date::min_date().serial_number() + 1;

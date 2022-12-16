@@ -73,9 +73,7 @@ impl InterestRate {
         ref_end: &Date,
     ) -> DiscountFactor {
         assert!(d2 >= d1, "d1 ({:?}) later than d2 ({:?})", d1, d2);
-        let t = self
-            .daycounter
-            .year_fraction_with_start_end(d1, d2, ref_start, ref_end);
+        let t = self.daycounter.year_fraction(d1, d2, ref_start, ref_end);
         self.discount_factor(t)
     }
 
@@ -112,9 +110,7 @@ impl InterestRate {
         ref_end: &Date,
     ) -> Real {
         assert!(d2 >= d1, "d1 ({:?}) later than d2 ({:?})", d1, d2);
-        let t = self
-            .daycounter
-            .year_fraction_with_start_end(d1, d2, ref_start, ref_end);
+        let t = self.daycounter.year_fraction(d1, d2, ref_start, ref_end);
         self.compound_factor(t)
     }
 
@@ -161,7 +157,7 @@ impl InterestRate {
                 }
             }
         };
-        InterestRate::new(r, result_dc.clone(), compounding.clone(), frequency)
+        InterestRate::new(r, *result_dc, compounding.clone(), frequency)
     }
 
     #[allow(clippy::too_many_arguments)]
@@ -177,7 +173,7 @@ impl InterestRate {
         ref_end: &Date,
     ) -> InterestRate {
         assert!(d2 >= d1, "d1 ({:?}) later than d2 ({:?})", d1, d2);
-        let t = result_dc.year_fraction_with_start_end(d1, d2, ref_start, ref_end);
+        let t = result_dc.year_fraction(d1, d2, ref_start, ref_end);
         self.implied_rate(compound, result_dc, compounding, frequency, t)
     }
 
@@ -215,10 +211,8 @@ impl InterestRate {
         ref_end: &Date,
     ) -> InterestRate {
         assert!(d2 >= d1, "d1 ({:?}) later than d2 ({:?})", d1, d2);
-        let t1 = self
-            .daycounter
-            .year_fraction_with_start_end(d1, d2, ref_start, ref_end);
-        let t2 = result_dc.year_fraction_with_start_end(d1, d2, ref_start, ref_end);
+        let t1 = self.daycounter.year_fraction(d1, d2, ref_start, ref_end);
+        let t2 = result_dc.year_fraction(d1, d2, ref_start, ref_end);
         self.implied_rate(
             self.compound_factor(t1),
             result_dc,
@@ -234,12 +228,12 @@ impl InterestRate {
 #[cfg(test)]
 mod test {
     use crate::maths::rounding::Rounding;
+    use crate::time::daycounter::DayCounter;
     use crate::types::{Rate, Size, Time};
 
     use crate::time::{
         compounding::Compounding::{self, *},
         date::Date,
-        daycounters::actual360::Actual360,
         frequency::Frequency::{self, *},
         time_to_days,
     };
@@ -248,7 +242,7 @@ mod test {
 
     #[test]
     fn test_interest_rate() {
-        let ir = InterestRate::new(0.1, Actual360::new(), Compounded, Annual);
+        let ir = InterestRate::new(0.1, DayCounter::actual360(), Compounded, Annual);
         assert_eq!(ir.frequency(), Annual);
     }
 
@@ -533,7 +527,7 @@ mod test {
 
         let d1 = Date::todays_date();
         for i in cases {
-            let ir = InterestRate::new(i.r, Actual360::new(), i.comp, i.freq);
+            let ir = InterestRate::new(i.r, DayCounter::actual360(), i.comp, i.freq);
             let d2 = d1 + time_to_days(i.t);
 
             // check that the compound factor is the inverse of the discount factor

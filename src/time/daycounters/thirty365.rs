@@ -1,28 +1,27 @@
-use std::sync::Arc;
-
 use crate::types::{Integer, Time};
 
-use crate::time::{
-    date::Date,
-    daycounter::{DayCounter, DayCounterDetail},
-};
+use crate::time::date::Date;
 
 /// 30/365 day count convention
+#[derive(Clone, Copy)]
 pub struct Thirty365 {}
 
-impl Thirty365 {
-    #[allow(clippy::new_ret_no_self)]
-    pub fn new() -> DayCounter {
-        DayCounter::new(Arc::new(Thirty365 {}))
+impl Default for Thirty365 {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
-impl DayCounterDetail for Thirty365 {
-    fn name(&self) -> String {
+impl Thirty365 {
+    pub fn new() -> Self {
+        Thirty365 {}
+    }
+
+    pub fn name(&self) -> String {
         "30/365".into()
     }
 
-    fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
+    pub fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
         let dd1 = d1.day_of_month();
         let dd2 = d2.day_of_month();
         let mm1 = d1.month() as Integer;
@@ -33,7 +32,7 @@ impl DayCounterDetail for Thirty365 {
         360 * (yy2 - yy1) + 30 * (mm2 - mm1) + (dd2 - dd1) as Integer
     }
 
-    fn year_fraction(
+    pub fn year_fraction(
         &self,
         d1: &Date,
         d2: &Date,

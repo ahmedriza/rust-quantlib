@@ -12,7 +12,7 @@ pub trait Solver1D: private::SolverDetail {
     /// well as a step used to scan the range of the possible bracketing values.
     ///
     /// # Arguments
-    /// 
+    ///
     /// * `f` - function that we need to solve
     /// * `guess` - initial guess
     /// * `step` - step used to increase or decrease the guess at each iteration
@@ -96,20 +96,13 @@ pub trait Solver1D: private::SolverDetail {
     /// must be true).
     ///
     /// # Arguments
-    /// 
+    ///
     /// * `f` - function that we need to solve
     /// * `accuracy` - required accuracy
     /// * `guess` - initial guess
     /// * `xmin` - minimum value of `x` for bracketing
-    /// * `xmax` - maximum value of `x` for bracketing 
-    fn solve_bracketed<F>(
-        &self,
-        f: F,
-        accuracy: Real,
-        guess: Real,
-        xmin: Real,
-        xmax: Real,
-    ) -> Real
+    /// * `xmax` - maximum value of `x` for bracketing
+    fn solve_bracketed<F>(&self, f: F, accuracy: Real, guess: Real, xmin: Real, xmax: Real) -> Real
     where
         F: Fn(Real) -> Real,
     {

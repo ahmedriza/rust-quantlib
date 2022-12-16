@@ -1,11 +1,15 @@
 use std::marker::PhantomData;
 
-use crate::{instruments::instrument::Instrument, types::{Real, Time, DiscountFactor}, time::date::Date};
+use crate::{
+    instruments::instrument::Instrument,
+    time::date::Date,
+    types::{DiscountFactor, Real, Time},
+};
 
 use super::iterativebootstrap::IterativeBootstrap;
 
 /// Piecewise yield term structure
-/// 
+///
 /// This term structure is bootstrapped on a number of interest rate instruments which are passed
 /// as a vector of RateHelper instances. Their maturities mark the boundaries of the interpolated
 /// segments.
@@ -17,9 +21,9 @@ use super::iterativebootstrap::IterativeBootstrap;
 /// The bootstrapping algorithm will fail if any two instruments have the same maturity date.
 ///
 /// # Type parameters
-/// 
+///
 /// * `C` - type of curve
-/// * `I` - type of interpolation 
+/// * `I` - type of interpolation
 ///
 /// # Arguments
 ///
@@ -34,7 +38,7 @@ pub struct PiecewiseYieldCurve<C, I> {
     _ph_i: PhantomData<I>,
 }
 
-impl <C, I> PiecewiseYieldCurve<C, I> {
+impl<C, I> PiecewiseYieldCurve<C, I> {
     pub fn max_date() -> Date {
         todo!()
     }
@@ -42,7 +46,7 @@ impl <C, I> PiecewiseYieldCurve<C, I> {
     pub fn discount_impl(_time: Time) -> DiscountFactor {
         todo!()
     }
-    
+
     pub fn perform_calculations(&self) {
         self.bootstrap.calculate();
     }

@@ -1,12 +1,6 @@
-use std::sync::Arc;
-
-use crate::types::{Integer, Time};
-
-use crate::time::{
-    date::Date,
-    daycounter::{DayCounter, DayCounterDetail},
-    months::Month,
-    Day, Year,
+use crate::{
+    time::{date::Date, months::Month, Day, Year},
+    types::{Integer, Time},
 };
 
 /// 30/360 day count convention
@@ -41,70 +35,86 @@ use crate::time::{
 ///   the same month. If the ending date is the 31st of a month and the starting date is earlier
 ///   than the 30th of a month, the ending date becomes equal to the 1st of the next month,
 ///   otherwise the ending date becomes equal to the 30th of the same month.
-pub struct Thirty360 {}
-
-impl Thirty360 {
-    pub fn usa() -> DayCounter {
-        DayCounter::new(Arc::new(US {}))
-    }
-
-    pub fn european() -> DayCounter {
-        DayCounter::new(Arc::new(EU {}))
-    }
-
-    pub fn euro_bond_basis() -> DayCounter {
-        Thirty360::european()
-    }
-
-    pub fn italian() -> DayCounter {
-        DayCounter::new(Arc::new(IT {}))
-    }
-
-    pub fn isma() -> DayCounter {
-        DayCounter::new(Arc::new(ISMA {}))
-    }
-
-    pub fn bond_basis() -> DayCounter {
-        Thirty360::isma()
-    }
-
-    pub fn isda(termination_date: Date) -> DayCounter {
-        DayCounter::new(Arc::new(ISDA { termination_date }))
-    }
-
-    pub fn german(termination_date: Date) -> DayCounter {
-        Thirty360::isda(termination_date)
-    }
-
-    pub fn nasd() -> DayCounter {
-        DayCounter::new(Arc::new(NASD {}))
-    }
+#[derive(Clone, Copy)]
+pub struct Thirty360 {
+    pub convention: Thiry360Convention,
 }
 
-trait DayCounterDetailThirty360: DayCounterDetail {
-    fn year_fraction(
+// -------------------------------------------------------------------------------------------------
+
+#[derive(Clone, Copy)]
+pub enum Thiry360Convention {
+    US(US),
+    ISMA(ISMA),
+    EU(EU),
+    IT(IT),
+    ISDA(ISDA),
+    NASD(NASD),
+}
+
+// -------------------------------------------------------------------------------------------------
+
+impl Thirty360 {
+    /// Return the name of the day counter
+    pub fn name(&self) -> String {
+        match &self.convention {
+            Thiry360Convention::US(c) => c.name(),
+            Thiry360Convention::ISMA(c) => c.name(),
+            Thiry360Convention::EU(c) => c.name(),
+            Thiry360Convention::IT(c) => c.name(),
+            Thiry360Convention::ISDA(c) => c.name(),
+            Thiry360Convention::NASD(c) => c.name(),
+        }
+    }
+
+    /// Returns the number of days between two dates.    
+    pub fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
+        match &self.convention {
+            Thiry360Convention::US(c) => c.day_count(d1, d2),
+            Thiry360Convention::ISMA(c) => c.day_count(d1, d2),
+            Thiry360Convention::EU(c) => c.day_count(d1, d2),
+            Thiry360Convention::IT(c) => c.day_count(d1, d2),
+            Thiry360Convention::ISDA(c) => c.day_count(d1, d2),
+            Thiry360Convention::NASD(c) => c.day_count(d1, d2),
+        }
+    }
+
+    /// Returns the period between two dates as a fraction of year    
+    pub fn year_fraction(
         &self,
         d1: &Date,
         d2: &Date,
-        _ref_period_start: &Date,
-        _ref_period_end: &Date,
+        ref_period_start: &Date,
+        ref_period_end: &Date,
     ) -> Time {
-        self.day_count(d1, d2) as Time / 360.0
+        match &self.convention {
+            Thiry360Convention::US(c) => c.year_fraction(d1, d2, ref_period_start, ref_period_end),
+            Thiry360Convention::ISMA(c) => {
+                c.year_fraction(d1, d2, ref_period_start, ref_period_end)
+            }
+            Thiry360Convention::EU(c) => c.year_fraction(d1, d2, ref_period_start, ref_period_end),
+            Thiry360Convention::IT(c) => c.year_fraction(d1, d2, ref_period_start, ref_period_end),
+            Thiry360Convention::ISDA(c) => {
+                c.year_fraction(d1, d2, ref_period_start, ref_period_end)
+            }
+            Thiry360Convention::NASD(c) => {
+                c.year_fraction(d1, d2, ref_period_start, ref_period_end)
+            }
+        }
     }
 }
 
 // -------------------------------------------------------------------------------------------------
 
+#[derive(Clone, Copy)]
 pub struct US {}
 
-impl DayCounterDetailThirty360 for US {}
-
-impl DayCounterDetail for US {
-    fn name(&self) -> String {
-        "30/360 (US)".into()
+impl US {
+    pub fn name(&self) -> String {
+        "30/360 (US)".to_string()
     }
 
-    fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
+    pub fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
         let mut dd1 = d1.day_of_month();
         let mut dd2 = d2.day_of_month();
         let mm1 = d1.month();
@@ -129,29 +139,28 @@ impl DayCounterDetail for US {
         360 * (yy2 - yy1) + 30 * (mm2 as Integer - mm1 as Integer) + (dd2 - dd1) as Integer
     }
 
-    fn year_fraction(
+    pub fn year_fraction(
         &self,
         d1: &Date,
         d2: &Date,
-        ref_period_start: &Date,
-        ref_period_end: &Date,
+        _ref_period_start: &Date,
+        _ref_period_end: &Date,
     ) -> Time {
-        DayCounterDetailThirty360::year_fraction(self, d1, d2, ref_period_start, ref_period_end)
+        self.day_count(d1, d2) as Time / 360.0
     }
 }
 
 // -------------------------------------------------------------------------------------------------
 
+#[derive(Clone, Copy)]
 pub struct ISMA {}
 
-impl DayCounterDetailThirty360 for ISMA {}
-
-impl DayCounterDetail for ISMA {
-    fn name(&self) -> String {
+impl ISMA {
+    pub fn name(&self) -> String {
         "30/360 (Bond Basis)".into()
     }
 
-    fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
+    pub fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
         let mut dd1 = d1.day_of_month();
         let mut dd2 = d2.day_of_month();
         let mm1 = d1.month() as Integer;
@@ -169,29 +178,28 @@ impl DayCounterDetail for ISMA {
         360 * (yy2 - yy1) + 30 * (mm2 - mm1) + (dd2 - dd1) as Integer
     }
 
-    fn year_fraction(
+    pub fn year_fraction(
         &self,
         d1: &Date,
         d2: &Date,
-        ref_period_start: &Date,
-        ref_period_end: &Date,
+        _ref_period_start: &Date,
+        _ref_period_end: &Date,
     ) -> Time {
-        DayCounterDetailThirty360::year_fraction(self, d1, d2, ref_period_start, ref_period_end)
+        self.day_count(d1, d2) as Time / 360.0
     }
 }
 
 // -------------------------------------------------------------------------------------------------
 
+#[derive(Clone, Copy)]
 pub struct EU {}
 
-impl DayCounterDetailThirty360 for EU {}
-
-impl DayCounterDetail for EU {
-    fn name(&self) -> String {
+impl EU {
+    pub fn name(&self) -> String {
         "30E/360 (Eurobond Basis)".into()
     }
 
-    fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
+    pub fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
         let mut dd1 = d1.day_of_month();
         let mut dd2 = d2.day_of_month();
         let mm1 = d1.month() as Integer;
@@ -209,29 +217,28 @@ impl DayCounterDetail for EU {
         360 * (yy2 - yy1) + 30 * (mm2 - mm1) + (dd2 - dd1) as Integer
     }
 
-    fn year_fraction(
+    pub fn year_fraction(
         &self,
         d1: &Date,
         d2: &Date,
-        ref_period_start: &Date,
-        ref_period_end: &Date,
+        _ref_period_start: &Date,
+        _ref_period_end: &Date,
     ) -> Time {
-        DayCounterDetailThirty360::year_fraction(self, d1, d2, ref_period_start, ref_period_end)
+        self.day_count(d1, d2) as Time / 360.0
     }
 }
 
 // -------------------------------------------------------------------------------------------------
 
+#[derive(Clone, Copy)]
 pub struct IT {}
 
-impl DayCounterDetailThirty360 for IT {}
-
-impl DayCounterDetail for IT {
-    fn name(&self) -> String {
+impl IT {
+    pub fn name(&self) -> String {
         "30/360 (Italian)".into()
     }
 
-    fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
+    pub fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
         let mut dd1 = d1.day_of_month();
         let mut dd2 = d2.day_of_month();
         let mm1 = d1.month() as Integer;
@@ -256,31 +263,30 @@ impl DayCounterDetail for IT {
         360 * (yy2 - yy1) + 30 * (mm2 - mm1) + (dd2 - dd1) as Integer
     }
 
-    fn year_fraction(
+    pub fn year_fraction(
         &self,
         d1: &Date,
         d2: &Date,
-        ref_period_start: &Date,
-        ref_period_end: &Date,
+        _ref_period_start: &Date,
+        _ref_period_end: &Date,
     ) -> Time {
-        DayCounterDetailThirty360::year_fraction(self, d1, d2, ref_period_start, ref_period_end)
+        self.day_count(d1, d2) as Time / 360.0
     }
 }
 
 // -------------------------------------------------------------------------------------------------
 
+#[derive(Clone, Copy)]
 pub struct ISDA {
     pub termination_date: Date,
 }
 
-impl DayCounterDetailThirty360 for ISDA {}
-
-impl DayCounterDetail for ISDA {
-    fn name(&self) -> String {
+impl ISDA {
+    pub fn name(&self) -> String {
         "30E/360 (ISDA)".into()
     }
 
-    fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
+    pub fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
         let mut dd1 = d1.day_of_month();
         let mut dd2 = d2.day_of_month();
         let mm1 = d1.month();
@@ -306,29 +312,28 @@ impl DayCounterDetail for ISDA {
         360 * (yy2 - yy1) + 30 * (mm2 as Integer - mm1 as Integer) + (dd2 - dd1) as Integer
     }
 
-    fn year_fraction(
+    pub fn year_fraction(
         &self,
         d1: &Date,
         d2: &Date,
-        ref_period_start: &Date,
-        ref_period_end: &Date,
+        _ref_period_start: &Date,
+        _ref_period_end: &Date,
     ) -> Time {
-        DayCounterDetailThirty360::year_fraction(self, d1, d2, ref_period_start, ref_period_end)
+        self.day_count(d1, d2) as Time / 360.0
     }
 }
 
 // -------------------------------------------------------------------------------------------------
 
+#[derive(Clone, Copy)]
 pub struct NASD {}
 
-impl DayCounterDetailThirty360 for NASD {}
-
-impl DayCounterDetail for NASD {
-    fn name(&self) -> String {
+impl NASD {
+    pub fn name(&self) -> String {
         "30/360 (NASD)".into()
     }
 
-    fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
+    pub fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
         let mut dd1 = d1.day_of_month();
         let mut dd2 = d2.day_of_month();
         let mm1 = d1.month() as Integer;
@@ -350,14 +355,14 @@ impl DayCounterDetail for NASD {
         360 * (yy2 - yy1) + 30 * (mm2 - mm1) + (dd2 - dd1) as Integer
     }
 
-    fn year_fraction(
+    pub fn year_fraction(
         &self,
         d1: &Date,
         d2: &Date,
-        ref_period_start: &Date,
-        ref_period_end: &Date,
+        _ref_period_start: &Date,
+        _ref_period_end: &Date,
     ) -> Time {
-        DayCounterDetailThirty360::year_fraction(self, d1, d2, ref_period_start, ref_period_end)
+        self.day_count(d1, d2) as Time / 360.0
     }
 }
 

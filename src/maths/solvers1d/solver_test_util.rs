@@ -1,18 +1,16 @@
 #![cfg(test)]
-use crate::types::Real;
 use super::solver1d::Solver1D;
+use crate::types::Real;
 
-pub(crate) fn test_solver<S>(
-    solver: &S,
-    name: &str,
-) where
+pub(crate) fn test_solver<S>(solver: &S, name: &str)
+where
     S: Solver1D,
 {
     let f1 = |x| x * x - 1.0;
     let expected = 1.0;
     let xmin = 0.0;
     let xmax = 2.0;
-    
+
     // guess on the left side of the root, increasing function
     test_not_bracketed(solver, name, &f1, 0.5, expected);
     test_bracketed(solver, name, &f1, 0.5, xmin, xmax, expected);
@@ -24,7 +22,7 @@ pub(crate) fn test_solver<S>(
 
     // guess on the right side of the root, decreasing function
     test_not_bracketed(solver, name, &f2, 1.5, expected);
-    test_bracketed(solver, name, &f2, 1.5, xmin, xmax, expected);    
+    test_bracketed(solver, name, &f2, 1.5, xmin, xmax, expected);
 
     let f3 = |x: Real| (x - 1.0).atan();
     // situation where bisection is used in the finite difference

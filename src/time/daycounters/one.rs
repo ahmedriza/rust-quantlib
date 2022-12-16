@@ -1,26 +1,22 @@
-use std::sync::Arc;
-
-use crate::time::date::Date;
-use crate::types::{Integer, Time};
-
-use crate::time::daycounter::{DayCounter, DayCounterDetail};
+use crate::{
+    time::date::Date,
+    types::{Integer, Time},
+};
 
 /// 1/1 day count convention
-pub struct OneDayCounter {}
+#[derive(Clone, Copy, Default)]
+pub struct One {}
 
-impl OneDayCounter {
-    #[allow(clippy::new_ret_no_self)]
-    pub fn new() -> DayCounter {
-        DayCounter::new(Arc::new(OneDayCounter {}))
+impl One {
+    pub fn new() -> Self {
+        One {}
     }
-}
 
-impl DayCounterDetail for OneDayCounter {
-    fn name(&self) -> String {
+    pub fn name(&self) -> String {
         "1/1".into()
     }
 
-    fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
+    pub fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
         if d2 >= d1 {
             1
         } else {
@@ -28,7 +24,7 @@ impl DayCounterDetail for OneDayCounter {
         }
     }
 
-    fn year_fraction(
+    pub fn year_fraction(
         &self,
         d1: &Date,
         d2: &Date,
@@ -49,7 +45,7 @@ mod test {
     use crate::time::timeunit::TimeUnit::*;
     use crate::types::Time;
 
-    use super::OneDayCounter;
+    use super::One;
 
     #[test]
     fn test_one_day_counter() {
@@ -63,14 +59,14 @@ mod test {
         let first = Date::new(1, January, 2004);
         let last = Date::new(31, December, 2004);
 
-        let dc = OneDayCounter::new();
+        let dc = One::new();
 
         let mut start = first;
         while start <= last {
             for i in 0..periods.len() {
                 let p = &periods[i];
                 let end = &start + p;
-                let calculated = dc.year_fraction(&start, &end);
+                let calculated = dc.year_fraction(&start, &end, &Date::default(), &Date::default());
                 let diff = (calculated - expected[i]).abs();
                 assert!(
                     diff < 1.0e-12,

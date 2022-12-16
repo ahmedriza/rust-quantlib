@@ -1,28 +1,28 @@
-use std::sync::Arc;
-
 use crate::time::date::Date;
 use crate::types::{Integer, Time};
 
-use crate::time::daycounter::{DayCounter, DayCounterDetail};
-
 /// Actual/366 day count convention, also known as "Act/366".
+#[derive(Clone, Copy)]
 pub struct Actual366 {
     include_last_day: bool,
 }
 
-impl Actual366 {
-    #[allow(clippy::new_ret_no_self)]
-    pub fn new() -> DayCounter {
-        Actual366::with_last_day(false)
-    }
-
-    pub fn with_last_day(include_last_day: bool) -> DayCounter {
-        DayCounter::new(Arc::new(Actual366 { include_last_day }))
+impl Default for Actual366 {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
-impl DayCounterDetail for Actual366 {
-    fn name(&self) -> String {
+impl Actual366 {
+    pub fn new() -> Self {
+        Actual366::with_last_day(false)
+    }
+
+    pub fn with_last_day(include_last_day: bool) -> Self {
+        Actual366 { include_last_day }
+    }
+
+    pub fn name(&self) -> String {
         if self.include_last_day {
             "Actual/366 (inc)".into()
         } else {
@@ -30,7 +30,7 @@ impl DayCounterDetail for Actual366 {
         }
     }
 
-    fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
+    pub fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
         if self.include_last_day {
             (d2 - d1) + 1
         } else {
@@ -38,7 +38,7 @@ impl DayCounterDetail for Actual366 {
         }
     }
 
-    fn year_fraction(
+    pub fn year_fraction(
         &self,
         d1: &Date,
         d2: &Date,
@@ -98,7 +98,12 @@ mod test {
         let dc = Actual366::new();
 
         for i in 1..test_dates.len() {
-            let calculated = dc.year_fraction(&test_dates[i - 1], &test_dates[i]);
+            let calculated = dc.year_fraction(
+                &test_dates[i - 1],
+                &test_dates[i],
+                &Date::default(),
+                &Date::default(),
+            );
 
             let diff = (calculated - expected[i - 1]).abs();
             assert!(

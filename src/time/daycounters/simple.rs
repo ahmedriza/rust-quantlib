@@ -1,13 +1,9 @@
-use std::sync::Arc;
-
-use crate::types::{Integer, Time};
-
-use crate::time::{
-    date::Date,
-    daycounter::{DayCounter, DayCounterDetail},
+use crate::{
+    time::date::Date,
+    types::{Integer, Time},
 };
 
-use super::thirty360::Thirty360;
+use super::thirty360::{Thirty360, Thiry360Convention, ISMA};
 
 /// Simple day counter for reproducing theoretical calculations.
 ///
@@ -17,34 +13,40 @@ use super::thirty360::Thirty360;
 /// This day counter should be used together with NullCalendar, which ensures that dates at
 /// whole-month distances share the same day of month. It is **not** guaranteed to work with
 /// any other calendar.
-pub struct SimpleDayCounter {
-    fallback: DayCounter,
+#[derive(Clone, Copy)]
+pub struct Simple {
+    pub fallback: Thirty360,
 }
 
-impl SimpleDayCounter {
-    #[allow(clippy::new_ret_no_self)]
-    pub fn new() -> DayCounter {
-        DayCounter::new(Arc::new(Self {
-            fallback: Thirty360::bond_basis(),
-        }))
+impl Default for Simple {
+    fn default() -> Self {
+        Self::new()
     }
 }
 
-impl DayCounterDetail for SimpleDayCounter {
-    fn name(&self) -> String {
+impl Simple {
+    pub fn new() -> Self {
+        Self {
+            fallback: Thirty360 {
+                convention: Thiry360Convention::ISMA(ISMA {}),
+            },
+        }
+    }
+
+    pub fn name(&self) -> String {
         "Simple".into()
     }
 
-    fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
+    pub fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
         self.fallback.day_count(d1, d2)
     }
 
-    fn year_fraction(
+    pub fn year_fraction(
         &self,
         d1: &Date,
         d2: &Date,
-        _ref_period_start: &Date,
-        _ref_period_end: &Date,
+        ref_period_start: &Date,
+        ref_period_end: &Date,
     ) -> Time {
         let dm1 = d1.day_of_month();
         let dm2 = d2.day_of_month();
@@ -58,7 +60,8 @@ impl DayCounterDetail for SimpleDayCounter {
             (d2.year() - d1.year()) as Time
                 + (d2.month() as Integer - d1.month() as Integer) as Time / 12.0
         } else {
-            self.fallback.year_fraction(d1, d2)
+            self.fallback
+                .year_fraction(d1, d2, ref_period_start, ref_period_end)
         }
     }
 }
