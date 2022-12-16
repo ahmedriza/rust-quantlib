@@ -52,7 +52,7 @@ pub trait Holiday {
 /// for a given market, and for incrementing/decrementing a date of a given number of business days.
 ///
 /// A calendar should be defined for specific exchange holiday schedule or for general country
-/// holiday schedule. 
+/// holiday schedule.
 #[derive(Clone)]
 pub struct Calendar {
     holiday: Arc<dyn Holiday>,
@@ -546,12 +546,7 @@ mod test {
 
         let c = Brazil::new();
         for i in 1..test_dates.len() {
-            let calculated = c.business_days_between(
-                test_dates[i - 1].clone(), // TODO remove clone
-                test_dates[i].clone(),     // TODO remove clone
-                true,
-                false,
-            );
+            let calculated = c.business_days_between(test_dates[i - 1], test_dates[i], true, false);
             assert!(
                 calculated == expected[i - 1],
                 "from {:?} included to {:?} excluded, calculated: \
@@ -562,12 +557,7 @@ mod test {
                 expected[i - 1]
             );
 
-            let calculated = c.business_days_between(
-                test_dates[i - 1].clone(), // TODO remove clone
-                test_dates[i].clone(),     // TODO remove clone
-                false,
-                true,
-            );
+            let calculated = c.business_days_between(test_dates[i - 1], test_dates[i], false, true);
             assert!(
                 calculated == expected_include_to[i - 1],
                 "from {:?} excluded to {:?} included, calculated: \
@@ -578,12 +568,7 @@ mod test {
                 expected_include_to[i - 1]
             );
 
-            let calculated = c.business_days_between(
-                test_dates[i - 1].clone(), // TODO remove clone
-                test_dates[i].clone(),     // TODO remove clone
-                true,
-                true,
-            );
+            let calculated = c.business_days_between(test_dates[i - 1], test_dates[i], true, true);
             assert!(
                 calculated == expected_include_all[i - 1],
                 "from {:?} included to {:?} included, calculated: \
@@ -594,12 +579,8 @@ mod test {
                 expected_include_all[i - 1]
             );
 
-            let calculated = c.business_days_between(
-                test_dates[i - 1].clone(), // TODO remove clone
-                test_dates[i].clone(),     // TODO remove clone
-                false,
-                false,
-            );
+            let calculated =
+                c.business_days_between(test_dates[i - 1], test_dates[i], false, false);
             assert!(
                 calculated == expected_exclude_all[i - 1],
                 "from {:?} excluded to {:?} excluded, calculated: \

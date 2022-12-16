@@ -41,7 +41,7 @@ use crate::time::{
 /// * Christmas, December 25th
 /// * Passion of Christ
 /// * Carnival
-/// * Corpus Christi
+/// * Corpus Christiqqq
 /// * The last business day of the year
 #[derive(Clone)]
 pub struct Brazil {}
@@ -53,6 +53,7 @@ impl Brazil {
         BrazilSettlement::new()
     }
 
+    /// Create an instance of the [BrazilExchange] calendar    
     pub fn exchange() -> Calendar {
         BrazilExchange::new()
     }
