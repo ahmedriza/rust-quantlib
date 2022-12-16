@@ -5,6 +5,8 @@ pub trait Rounding {
     fn round(&self, value: Decimal) -> Decimal;
 }
 
+// -------------------------------------------------------------------------------------------------
+
 #[derive(Clone, PartialEq, Eq)]
 pub struct NoRounding {}
 
