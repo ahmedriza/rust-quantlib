@@ -52,8 +52,7 @@ pub trait Holiday {
 /// for a given market, and for incrementing/decrementing a date of a given number of business days.
 ///
 /// A calendar should be defined for specific exchange holiday schedule or for general country
-/// holiday schedule. Legacy city holiday schedule calendars will be moved to the exchange/country
-/// convention.
+/// holiday schedule. 
 #[derive(Clone)]
 pub struct Calendar {
     holiday: Arc<dyn Holiday>,
