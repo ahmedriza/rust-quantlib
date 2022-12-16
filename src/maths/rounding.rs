@@ -5,6 +5,44 @@ pub trait Rounding {
     fn round(&self, value: Decimal) -> Decimal;
 }
 
+#[derive(Clone, PartialEq, Eq)]
+pub struct NoRounding {}
+
+// -------------------------------------------------------------------------------------------------
+
+#[derive(Clone, PartialEq, Eq)]
+pub struct UpRounding {
+    data: RoundingData,
+}
+
+// -------------------------------------------------------------------------------------------------
+
+#[derive(Clone, PartialEq, Eq)]
+pub struct DownRounding {
+    data: RoundingData,
+}
+
+// -------------------------------------------------------------------------------------------------
+
+#[derive(Clone, PartialEq, Eq)]
+pub struct ClosestRounding {
+    data: RoundingData,
+}
+
+// -------------------------------------------------------------------------------------------------
+
+#[derive(Clone, PartialEq, Eq)]
+pub struct CeilingTruncation {
+    data: RoundingData,
+}
+
+// -------------------------------------------------------------------------------------------------
+
+#[derive(Clone, PartialEq, Eq)]
+pub struct FloorTruncation {
+    data: RoundingData,
+}
+
 // -------------------------------------------------------------------------------------------------
 
 /// Rounding methods.
@@ -48,46 +86,6 @@ pub enum RoundingType {
     /// Positive numbers will be rounded up and negative numbers will be rounded down using the
     /// OMG round up and round down rules    
     FloorTruncation(FloorTruncation),
-}
-
-// -------------------------------------------------------------------------------------------------
-
-#[derive(Clone, PartialEq, Eq)]
-pub struct NoRounding {}
-
-// -------------------------------------------------------------------------------------------------
-
-#[derive(Clone, PartialEq, Eq)]
-pub struct UpRounding {
-    data: RoundingData,
-}
-
-// -------------------------------------------------------------------------------------------------
-
-#[derive(Clone, PartialEq, Eq)]
-pub struct DownRounding {
-    data: RoundingData,
-}
-
-// -------------------------------------------------------------------------------------------------
-
-#[derive(Clone, PartialEq, Eq)]
-pub struct ClosestRounding {
-    data: RoundingData,
-}
-
-// -------------------------------------------------------------------------------------------------
-
-#[derive(Clone, PartialEq, Eq)]
-pub struct CeilingTruncation {
-    data: RoundingData,
-}
-
-// -------------------------------------------------------------------------------------------------
-
-#[derive(Clone, PartialEq, Eq)]
-pub struct FloorTruncation {
-    data: RoundingData,
 }
 
 // -------------------------------------------------------------------------------------------------
