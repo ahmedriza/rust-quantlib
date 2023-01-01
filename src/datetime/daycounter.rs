@@ -59,48 +59,6 @@ impl PartialEq for DayCounter {
 }
 
 impl DayCounter {
-    /// Return the name of the day counter
-    pub fn name(&self) -> String {
-        match self {
-            DayCounter::Actual360(dc) => dc.name(),
-            DayCounter::Actual366(dc) => dc.name(),
-            DayCounter::One(dc) => dc.name(),
-            DayCounter::Simple(dc) => dc.name(),
-            DayCounter::Thirty360(dc) => dc.name(),
-            DayCounter::Thirty365(dc) => dc.name(),
-        }
-    }
-
-    /// Returns the number of days between two dates.
-    pub fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
-        match self {
-            DayCounter::Actual360(dc) => dc.day_count(d1, d2),
-            DayCounter::Actual366(dc) => dc.day_count(d1, d2),
-            DayCounter::One(dc) => dc.day_count(d1, d2),
-            DayCounter::Simple(dc) => dc.day_count(d1, d2),
-            DayCounter::Thirty360(dc) => dc.day_count(d1, d2),
-            DayCounter::Thirty365(dc) => dc.day_count(d1, d2),
-        }
-    }
-
-    /// Returns the period between two dates as a fraction of year    
-    pub fn year_fraction(
-        &self,
-        d1: &Date,
-        d2: &Date,
-        ref_period_start: &Date,
-        ref_period_end: &Date,
-    ) -> Time {
-        match self {
-            DayCounter::Actual360(dc) => dc.year_fraction(d1, d2, ref_period_start, ref_period_end),
-            DayCounter::Actual366(dc) => dc.year_fraction(d1, d2, ref_period_start, ref_period_end),
-            DayCounter::One(dc) => dc.year_fraction(d1, d2, ref_period_start, ref_period_end),
-            DayCounter::Simple(dc) => dc.year_fraction(d1, d2, ref_period_start, ref_period_end),
-            DayCounter::Thirty360(dc) => dc.year_fraction(d1, d2, ref_period_start, ref_period_end),
-            DayCounter::Thirty365(dc) => dc.year_fraction(d1, d2, ref_period_start, ref_period_end),
-        }
-    }
-
     /// Return an instance of an [Actual360] day counter
     pub fn actual360() -> DayCounter {
         DayCounter::Actual360(Actual360::new())
@@ -166,6 +124,48 @@ impl DayCounter {
         DayCounter::Thirty360(Thirty360 {
             convention: Thiry360Convention::NASD(NASD {}),
         })
+    }
+    
+    /// Return the name of the day counter
+    pub fn name(&self) -> String {
+        match self {
+            DayCounter::Actual360(dc) => dc.name(),
+            DayCounter::Actual366(dc) => dc.name(),
+            DayCounter::One(dc) => dc.name(),
+            DayCounter::Simple(dc) => dc.name(),
+            DayCounter::Thirty360(dc) => dc.name(),
+            DayCounter::Thirty365(dc) => dc.name(),
+        }
+    }
+
+    /// Returns the number of days between two dates.
+    pub fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
+        match self {
+            DayCounter::Actual360(dc) => dc.day_count(d1, d2),
+            DayCounter::Actual366(dc) => dc.day_count(d1, d2),
+            DayCounter::One(dc) => dc.day_count(d1, d2),
+            DayCounter::Simple(dc) => dc.day_count(d1, d2),
+            DayCounter::Thirty360(dc) => dc.day_count(d1, d2),
+            DayCounter::Thirty365(dc) => dc.day_count(d1, d2),
+        }
+    }
+
+    /// Returns the period between two dates as a fraction of year    
+    pub fn year_fraction(
+        &self,
+        d1: &Date,
+        d2: &Date,
+        ref_period_start: &Date,
+        ref_period_end: &Date,
+    ) -> Time {
+        match self {
+            DayCounter::Actual360(dc) => dc.year_fraction(d1, d2, ref_period_start, ref_period_end),
+            DayCounter::Actual366(dc) => dc.year_fraction(d1, d2, ref_period_start, ref_period_end),
+            DayCounter::One(dc) => dc.year_fraction(d1, d2, ref_period_start, ref_period_end),
+            DayCounter::Simple(dc) => dc.year_fraction(d1, d2, ref_period_start, ref_period_end),
+            DayCounter::Thirty360(dc) => dc.year_fraction(d1, d2, ref_period_start, ref_period_end),
+            DayCounter::Thirty365(dc) => dc.year_fraction(d1, d2, ref_period_start, ref_period_end),
+        }
     }
 }
 
