@@ -4,6 +4,7 @@ use super::{
     date::Date,
     holidays::{
         brazil::{BrazilExchange, BrazilSettlement},
+        italy::{ItalyExchange, ItalySettlement},
         japan::Japan,
         nilholiday::NilHoliday,
         target::Target,
@@ -19,11 +20,13 @@ use super::{
 
 #[derive(Debug, Clone, Copy)]
 pub enum Holiday {
-    Target(Target),
-    NilHoliday(NilHoliday),
-    BrazilSettlement(BrazilSettlement),
     BrazilExchange(BrazilExchange),
+    BrazilSettlement(BrazilSettlement),
+    ItalyExchange(ItalyExchange),
+    ItalySettlement(ItalySettlement),
     Japan(Japan),
+    NilHoliday(NilHoliday),
+    Target(Target),
     UnitedStatesSettlement(UnitedStatesSettlement),
     UnitedStatesLiborImpact(UnitedStatesLiborImpact),
     UnitedStatesNyse(UnitedStatesNyse),
@@ -39,54 +42,60 @@ impl Holiday {
     /// to be used for writing switch-on-type code.                
     pub fn name(&self) -> String {
         match self {
-            Holiday::Target(h) => h.name(),
-            Holiday::NilHoliday(h) => h.name(),
-            Holiday::BrazilSettlement(h) => h.name(),
             Holiday::BrazilExchange(h) => h.name(),
-            Holiday::WeekendsOnly(h) => h.name(),
+            Holiday::BrazilSettlement(h) => h.name(),
+            Holiday::ItalyExchange(h) => h.name(),
+            Holiday::ItalySettlement(h) => h.name(),
             Holiday::Japan(h) => h.name(),
+            Holiday::NilHoliday(h) => h.name(),
+            Holiday::Target(h) => h.name(),
             Holiday::UnitedStatesSettlement(h) => h.name(),
             Holiday::UnitedStatesLiborImpact(h) => h.name(),
             Holiday::UnitedStatesNyse(h) => h.name(),
             Holiday::UnitedStatesGovernmentBond(h) => h.name(),
             Holiday::UnitedStatesNerc(h) => h.name(),
             Holiday::UnitedStatesFederalReserve(h) => h.name(),
+            Holiday::WeekendsOnly(h) => h.name(),
         }
     }
 
     /// Returns `true` iff the date is a business day for the given market.
     pub fn is_business_day(&self, date: &Date) -> bool {
         match self {
-            Holiday::Target(h) => h.is_business_day(date),
-            Holiday::NilHoliday(h) => h.is_business_day(date),
-            Holiday::BrazilSettlement(h) => h.is_business_day(date),
             Holiday::BrazilExchange(h) => h.is_business_day(date),
-            Holiday::WeekendsOnly(h) => h.is_business_day(date),
+            Holiday::BrazilSettlement(h) => h.is_business_day(date),
+            Holiday::ItalyExchange(h) => h.is_business_day(date),
+            Holiday::ItalySettlement(h) => h.is_business_day(date),
             Holiday::Japan(h) => h.is_business_day(date),
+            Holiday::NilHoliday(h) => h.is_business_day(date),
+            Holiday::Target(h) => h.is_business_day(date),
             Holiday::UnitedStatesSettlement(h) => h.is_business_day(date),
             Holiday::UnitedStatesLiborImpact(h) => h.is_business_day(date),
             Holiday::UnitedStatesNyse(h) => h.is_business_day(date),
             Holiday::UnitedStatesGovernmentBond(h) => h.is_business_day(date),
             Holiday::UnitedStatesNerc(h) => h.is_business_day(date),
             Holiday::UnitedStatesFederalReserve(h) => h.is_business_day(date),
+            Holiday::WeekendsOnly(h) => h.is_business_day(date),
         }
     }
 
     /// Returns `true` iff the weekday is part of the weekend for the given market.
     pub fn is_weekend(&self, weekday: Weekday) -> bool {
         match self {
-            Holiday::Target(h) => h.is_weekend(weekday),
-            Holiday::NilHoliday(h) => h.is_weekend(weekday),
-            Holiday::BrazilSettlement(h) => h.is_weekend(weekday),
             Holiday::BrazilExchange(h) => h.is_weekend(weekday),
-            Holiday::WeekendsOnly(h) => h.is_weekend(weekday),
+            Holiday::BrazilSettlement(h) => h.is_weekend(weekday),
+            Holiday::ItalyExchange(h) => h.is_weekend(weekday),
+            Holiday::ItalySettlement(h) => h.is_weekend(weekday),
             Holiday::Japan(h) => h.is_weekend(weekday),
+            Holiday::NilHoliday(h) => h.is_weekend(weekday),
+            Holiday::Target(h) => h.is_weekend(weekday),
             Holiday::UnitedStatesSettlement(h) => h.is_weekend(weekday),
             Holiday::UnitedStatesLiborImpact(h) => h.is_weekend(weekday),
             Holiday::UnitedStatesNyse(h) => h.is_weekend(weekday),
             Holiday::UnitedStatesGovernmentBond(h) => h.is_weekend(weekday),
             Holiday::UnitedStatesNerc(h) => h.is_weekend(weekday),
             Holiday::UnitedStatesFederalReserve(h) => h.is_weekend(weekday),
+            Holiday::WeekendsOnly(h) => h.is_weekend(weekday),
         }
     }
 }
