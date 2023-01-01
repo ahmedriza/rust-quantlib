@@ -1,8 +1,8 @@
 use std::marker::PhantomData;
 
 use crate::{
-    instruments::instrument::Instrument,
     datetime::date::Date,
+    instruments::instrument::Instrument,
     types::{DiscountFactor, Real, Time},
 };
 

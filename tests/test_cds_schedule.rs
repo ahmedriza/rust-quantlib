@@ -1,18 +1,18 @@
 use std::collections::HashMap;
 
 use rust_quantlib::context::pricing_context::PricingContext;
-use rust_quantlib::instruments::creditdefaultswap::cds_maturity;
 use rust_quantlib::datetime::{
     businessdayconvention::BusinessDayConvention,
-    holidays::weekendsonly::WeekendsOnly,
     date::Date,
     dategenerationrule::DateGenerationRule,
+    holidays::weekendsonly::WeekendsOnly,
     months::Month::*,
     months::*,
     period::Period,
     schedule::{Schedule, ScheduleBuilder},
     timeunit::TimeUnit::*,
 };
+use rust_quantlib::instruments::creditdefaultswap::cds_maturity;
 
 #[test]
 fn test_cds2015_convention() {

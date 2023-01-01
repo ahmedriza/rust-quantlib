@@ -125,7 +125,7 @@ impl DayCounter {
             convention: Thiry360Convention::NASD(NASD {}),
         })
     }
-    
+
     /// Return the name of the day counter
     pub fn name(&self) -> String {
         match self {

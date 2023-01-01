@@ -1,7 +1,6 @@
-use crate::datetime::{
-    compounding::Compounding, date::Date, daycounter::DayCounter, frequency::Frequency,
-    interestrate::InterestRate, period::Period,
-};
+use crate::datetime::{date::Date, daycounter::DayCounter, frequency::Frequency, period::Period};
+use crate::rates::compounding::Compounding;
+use crate::rates::interestrate::InterestRate;
 
 use crate::{
     termstructures::termstructure::TermStructure,

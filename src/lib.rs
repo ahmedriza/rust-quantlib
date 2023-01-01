@@ -54,13 +54,14 @@
 pub mod cashflows;
 pub mod context;
 pub mod currencies;
+pub mod datetime;
 pub mod instruments;
 pub mod maths;
 pub mod misc;
 pub mod pricingengines;
 pub mod processes;
 pub mod quotes;
+pub mod rates;
 pub mod termstructures;
-pub mod datetime;
 pub mod types;
 pub mod utils;

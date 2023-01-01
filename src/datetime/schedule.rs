@@ -862,9 +862,9 @@ mod test {
     use crate::context::pricing_context::PricingContext;
     use crate::datetime::{
         businessdayconvention::BusinessDayConvention,
-        holidays::{japan::Japan, target::Target, unitedstates::UnitedStates},
         date::Date,
         frequency::Frequency,
+        holidays::{japan::Japan, target::Target, unitedstates::UnitedStates},
         months::Month::*,
         period::Period,
         timeunit::TimeUnit::*,

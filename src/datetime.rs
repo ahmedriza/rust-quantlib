@@ -2,7 +2,6 @@ use crate::types::{Integer, Natural, Time};
 
 pub mod businessdayconvention;
 pub mod calendar;
-pub mod compounding;
 pub mod date;
 pub mod dategenerationrule;
 pub mod daycounter;
@@ -11,7 +10,6 @@ pub mod frequency;
 pub mod holiday;
 pub mod holidays;
 pub mod imm;
-pub mod interestrate;
 pub mod months;
 pub mod period;
 pub mod schedule;

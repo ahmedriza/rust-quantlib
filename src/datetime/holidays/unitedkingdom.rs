@@ -19,7 +19,7 @@ impl UnitedKingdom {
     #[allow(clippy::new_ret_no_self)]
     /// The default calendar is the [UnitedKingdomSettlement] calendar
     pub fn new() -> Calendar {
-        UnitedKingdomSettlement::new()        
+        UnitedKingdomSettlement::new()
     }
 
     /// Create an instance of [UnitedKingdomExchange] calendar

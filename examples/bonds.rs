@@ -1,9 +1,8 @@
 use rust_quantlib::context::pricing_context::PricingContext;
-use rust_quantlib::quotes::simplequote::SimpleQuote;
 use rust_quantlib::datetime::{
-    holidays::target::Target, date::Date,
-    months::Month::*, timeunit::TimeUnit::*,
+    date::Date, holidays::target::Target, months::Month::*, timeunit::TimeUnit::*,
 };
+use rust_quantlib::quotes::simplequote::SimpleQuote;
 
 /// This example shows how to set up a term structure and then price some simple bonds.
 #[allow(unused)]

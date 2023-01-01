@@ -1,9 +1,7 @@
 use crate::types::Integer;
 
-use crate::datetime::{
-    date::Date, months::Month::*, weekday::Weekday::*,
-};
 use crate::context::pricing_context::PricingContext;
+use crate::datetime::{date::Date, months::Month::*, weekday::Weekday::*};
 
 /// Main cycle of the International Monetary Market (a.k.a. IMM) months
 ///
@@ -228,9 +226,7 @@ impl IMM {
 #[cfg(test)]
 mod test {
     use crate::context::pricing_context::PricingContext;
-    use crate::datetime::{
-        date::Date, imm::IMM, months::Month::*,
-    };
+    use crate::datetime::{date::Date, imm::IMM, months::Month::*};
 
     #[test]
     fn test_is_imm_code() {

@@ -1,12 +1,17 @@
 use std::fmt::Debug;
 
-use crate::{datetime::{
-    calendar::Calendar,
-    date::Date,
-    months::Month::*,
-    weekday::Weekday::{self, *},
-    weekend::{Weekend, WesternWeekend}, Day, holiday,
-}, types::Time};
+use crate::{
+    datetime::{
+        calendar::Calendar,
+        date::Date,
+        holiday,
+        months::Month::*,
+        weekday::Weekday::{self, *},
+        weekend::{Weekend, WesternWeekend},
+        Day,
+    },
+    types::Time,
+};
 
 #[derive(Clone, Copy)]
 pub struct Japan {
