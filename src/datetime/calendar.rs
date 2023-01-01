@@ -2,7 +2,7 @@ use std::{collections::HashSet, sync::Arc};
 
 use crate::types::{Integer, Natural, Size};
 
-use crate::time::{
+use crate::datetime::{
     businessdayconvention::BusinessDayConvention, date::Date, period::Period, timeunit::TimeUnit,
     weekday::Weekday, Day, Year,
 };
@@ -471,7 +471,7 @@ const ORTHODOX_EASTER_MONDAYS: [Natural; 300] = [
 
 #[cfg(test)]
 mod test {
-    use crate::time::{
+    use crate::datetime::{
         calendars::{brazil::Brazil, target::Target},
         date::Date,
         months::Month,

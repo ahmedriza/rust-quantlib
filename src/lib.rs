@@ -16,7 +16,7 @@
 //!
 //! ```no_run
 //! use rust_quantlib::quotes::simplequote::SimpleQuote;
-//! use rust_quantlib::time::{
+//! use rust_quantlib::datetime::{
 //!    calendars::target::Target, context::pricing_context::PricingContext, date::Date,
 //!    months::Month::*, timeunit::TimeUnit::*,
 //! };
@@ -61,6 +61,6 @@ pub mod pricingengines;
 pub mod processes;
 pub mod quotes;
 pub mod termstructures;
-pub mod time;
+pub mod datetime;
 pub mod types;
 pub mod utils;

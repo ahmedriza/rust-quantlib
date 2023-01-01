@@ -1,4 +1,4 @@
-use crate::time::date::Date;
+use crate::datetime::date::Date;
 
 /// This structure holds contextual information necessary for pricing, such
 /// as the evaluation date.

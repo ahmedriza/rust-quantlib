@@ -1,5 +1,5 @@
 use crate::{
-    time::date::Date,
+    datetime::date::Date,
     types::{Integer, Time},
 };
 
@@ -39,10 +39,10 @@ impl One {
 
 #[cfg(test)]
 mod test {
-    use crate::time::date::Date;
-    use crate::time::months::Month::*;
-    use crate::time::period::Period;
-    use crate::time::timeunit::TimeUnit::*;
+    use crate::datetime::date::Date;
+    use crate::datetime::months::Month::*;
+    use crate::datetime::period::Period;
+    use crate::datetime::timeunit::TimeUnit::*;
     use crate::types::Time;
 
     use super::One;

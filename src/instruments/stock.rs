@@ -4,7 +4,7 @@ use crate::{
     instruments::instrument::{Instrument, InstrumentResults},
     types::Real,
 };
-use crate::{quotes::quote::Quote, time::date::Date};
+use crate::{quotes::quote::Quote, datetime::date::Date};
 
 // Simple stock
 pub struct Stock {
@@ -34,7 +34,7 @@ mod test {
     use std::sync::Arc;
 
     use crate::quotes::simplequote::SimpleQuote;
-    use crate::time::date::Date;
+    use crate::datetime::date::Date;
     use crate::types::Real;
 
     use crate::instruments::instrument::Instrument;

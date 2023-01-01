@@ -4,7 +4,7 @@ use std::{
     ops::{Add, AddAssign, Sub, SubAssign},
 };
 
-use crate::time::{
+use crate::datetime::{
     months::Month, period::Period, timeunit::TimeUnit, weekday::Weekday, Day, SerialNumber, Year,
 };
 use crate::types::{BigInteger, Integer, Natural, Size, Time};
@@ -519,7 +519,7 @@ mod test {
 
     use crate::types::Integer;
 
-    use crate::time::{date::Month, period::Period, timeunit::TimeUnit, weekday::Weekday};
+    use crate::datetime::{date::Month, period::Period, timeunit::TimeUnit, weekday::Weekday};
 
     use super::Date;
 

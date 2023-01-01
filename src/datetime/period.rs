@@ -5,7 +5,7 @@ use std::{
 
 use crate::types::{Integer, Real};
 
-use crate::time::{
+use crate::datetime::{
     frequency::Frequency, frequency::Frequency::*, timeunit::TimeUnit, timeunit::TimeUnit::*,
 };
 
@@ -403,7 +403,7 @@ impl Period {
 
 #[cfg(test)]
 mod test {
-    use crate::time::{frequency::Frequency::*, timeunit::TimeUnit::*};
+    use crate::datetime::{frequency::Frequency::*, timeunit::TimeUnit::*};
 
     use super::Period;
 

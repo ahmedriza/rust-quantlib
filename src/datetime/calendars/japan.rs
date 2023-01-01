@@ -1,9 +1,9 @@
 use std::sync::Arc;
 
-use crate::time::date::Date;
+use crate::datetime::date::Date;
 use crate::types::Time;
 
-use crate::time::{
+use crate::datetime::{
     calendar::{Calendar, Holiday, Weekend, WesternWeekend},
     months::Month::*,
     weekday::Weekday::{self, *},

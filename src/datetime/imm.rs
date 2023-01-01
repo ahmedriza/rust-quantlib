@@ -1,6 +1,6 @@
 use crate::types::Integer;
 
-use crate::time::{
+use crate::datetime::{
     context::pricing_context::PricingContext, date::Date, months::Month::*, weekday::Weekday::*,
 };
 
@@ -226,7 +226,7 @@ impl IMM {
 
 #[cfg(test)]
 mod test {
-    use crate::time::{
+    use crate::datetime::{
         context::pricing_context::PricingContext, date::Date, imm::IMM, months::Month::*,
     };
 

@@ -1,4 +1,4 @@
-use crate::time::date::Date;
+use crate::datetime::date::Date;
 use crate::types::{Natural, Time};
 
 /// Basic term structure functionality

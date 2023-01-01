@@ -1,5 +1,5 @@
 use crate::{
-    time::date::Date,
+    datetime::date::Date,
     types::{Integer, Time},
 };
 

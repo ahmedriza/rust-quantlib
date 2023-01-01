@@ -174,7 +174,7 @@ impl DayCounter {
 #[cfg(test)]
 mod test {
     use crate::{
-        time::{date::Date, months::Month::*},
+        datetime::{date::Date, months::Month::*},
         types::Integer,
     };
 

@@ -1,4 +1,4 @@
-use crate::time::date::Date;
+use crate::datetime::date::Date;
 use crate::types::{Integer, Time};
 
 /// Actual/366 day count convention, also known as "Act/366".
@@ -53,8 +53,8 @@ impl Actual366 {
 
 #[cfg(test)]
 mod test {
-    use crate::time::date::Date;
-    use crate::time::months::Month::*;
+    use crate::datetime::date::Date;
+    use crate::datetime::months::Month::*;
 
     use super::Actual366;
 

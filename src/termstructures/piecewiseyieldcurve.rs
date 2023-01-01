@@ -2,7 +2,7 @@ use std::marker::PhantomData;
 
 use crate::{
     instruments::instrument::Instrument,
-    time::date::Date,
+    datetime::date::Date,
     types::{DiscountFactor, Real, Time},
 };
 

@@ -1,6 +1,6 @@
 use crate::types::{Integer, Time};
 
-use crate::time::date::Date;
+use crate::datetime::date::Date;
 
 /// 30/365 day count convention
 #[derive(Clone, Copy)]

@@ -1,4 +1,4 @@
-use crate::time::date::Date;
+use crate::datetime::date::Date;
 use crate::types::Real;
 
 pub trait Cashflow {

@@ -1,5 +1,5 @@
 use crate::maths::interpolations::interpolation::Interpolation;
-use crate::time::date::Date;
+use crate::datetime::date::Date;
 use crate::types::{Real, Time};
 
 pub struct InterpolatedCurve<I>

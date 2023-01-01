@@ -2,7 +2,7 @@ use std::f64::consts::E;
 
 use crate::types::{DiscountFactor, Integer, Rate, Real, Time};
 
-use crate::time::{
+use crate::datetime::{
     compounding::Compounding, date::Date, daycounter::DayCounter, frequency::Frequency,
 };
 
@@ -229,10 +229,10 @@ impl InterestRate {
 #[cfg(test)]
 mod test {
     use crate::maths::rounding::Rounding;
-    use crate::time::daycounter::DayCounter;
+    use crate::datetime::daycounter::DayCounter;
     use crate::types::{Rate, Size, Time};
 
-    use crate::time::{
+    use crate::datetime::{
         compounding::Compounding::{self, *},
         date::Date,
         frequency::Frequency::{self, *},

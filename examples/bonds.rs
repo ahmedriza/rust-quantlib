@@ -1,5 +1,5 @@
 use rust_quantlib::quotes::simplequote::SimpleQuote;
-use rust_quantlib::time::{
+use rust_quantlib::datetime::{
     calendars::target::Target, context::pricing_context::PricingContext, date::Date,
     months::Month::*, timeunit::TimeUnit::*,
 };

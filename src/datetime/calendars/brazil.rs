@@ -1,6 +1,6 @@
 use std::sync::Arc;
 
-use crate::time::{
+use crate::datetime::{
     calendar::{easter_monday, Calendar, Holiday, Weekend, WesternWeekend},
     date::Date,
     months::Month::*,
@@ -199,8 +199,8 @@ impl Holiday for BrazilExchange {
 
 #[cfg(test)]
 mod test {
-    use crate::time::date::Date;
-    use crate::time::months::Month::*;
+    use crate::datetime::date::Date;
+    use crate::datetime::months::Month::*;
 
     use super::Brazil;
 
