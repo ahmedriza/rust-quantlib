@@ -4,7 +4,6 @@ pub mod businessdayconvention;
 pub mod calendar;
 pub mod calendars;
 pub mod compounding;
-pub mod context;
 pub mod date;
 pub mod dategenerationrule;
 pub mod daycounter;

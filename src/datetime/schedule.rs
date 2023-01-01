@@ -1,11 +1,12 @@
 use std::ops::Index;
 
+use crate::context::pricing_context::PricingContext;
 use crate::maths::bounds::lower_bound;
 use crate::types::{Integer, Size};
 
 use crate::datetime::{
     businessdayconvention::BusinessDayConvention, calendar::Calendar,
-    calendars::nullcalendar::NullCalendar, context::pricing_context::PricingContext, date::Date,
+    calendars::nullcalendar::NullCalendar, date::Date,
     dategenerationrule::DateGenerationRule, imm::IMM, period::Period, timeunit::TimeUnit::*,
     weekday::Weekday::*,
 };
@@ -859,10 +860,10 @@ fn allows_end_of_month(tenor: &Period) -> bool {
 
 #[cfg(test)]
 mod test {
+    use crate::context::pricing_context::PricingContext;
     use crate::datetime::{
         businessdayconvention::BusinessDayConvention,
         calendars::{japan::Japan, target::Target, unitedstates::UnitedStates},
-        context::pricing_context::PricingContext,
         date::Date,
         frequency::Frequency,
         months::Month::*,

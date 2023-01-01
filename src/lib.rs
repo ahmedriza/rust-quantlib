@@ -15,9 +15,10 @@
 //! for the original QuantLib C++ version of the following example.
 //!
 //! ```no_run
+//! use rust_quantlib::context::pricing_context::PricingContext;
 //! use rust_quantlib::quotes::simplequote::SimpleQuote;
 //! use rust_quantlib::datetime::{
-//!    calendars::target::Target, context::pricing_context::PricingContext, date::Date,
+//!    calendars::target::Target, date::Date,
 //!    months::Month::*, timeunit::TimeUnit::*,
 //! };
 //!
@@ -53,6 +54,7 @@
 //!```
 //!
 pub mod cashflows;
+pub mod context;
 pub mod currencies;
 pub mod instruments;
 pub mod maths;
