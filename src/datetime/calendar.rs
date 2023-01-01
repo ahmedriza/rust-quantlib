@@ -1,4 +1,4 @@
-use std::{collections::HashSet, sync::Arc};
+use std::collections::HashSet;
 
 use crate::types::{Integer, Natural, Size};
 
@@ -7,44 +7,7 @@ use crate::datetime::{
     weekday::Weekday, Day, Year,
 };
 
-// -------------------------------------------------------------------------------------------------
-
-pub trait Weekend {
-    fn is_weekend(&self, weekday: Weekday) -> bool;
-}
-
-/// Definition of a Western weeekend
-pub struct WesternWeekend {}
-
-impl Weekend for WesternWeekend {
-    fn is_weekend(&self, weekday: Weekday) -> bool {
-        weekday == Weekday::Saturday || weekday == Weekday::Sunday
-    }
-}
-
-/// Definition of an Orthodox weeekend
-pub struct OrthodoxWeekend {}
-
-impl Weekend for OrthodoxWeekend {
-    fn is_weekend(&self, weekday: Weekday) -> bool {
-        weekday == Weekday::Saturday || weekday == Weekday::Sunday
-    }
-}
-
-// -------------------------------------------------------------------------------------------------
-
-pub trait Holiday {
-    /// Returns the name of the calendar.
-    /// This method is used for output and comparison between calendars. It is **not** meant
-    /// to be used for writing switch-on-type code.    
-    fn name(&self) -> String;
-
-    /// Returns `true` iff the date is a business day for the given market.
-    fn is_business_day(&self, date: &Date) -> bool;
-
-    /// Returns `true` iff the weekday is part of the weekend for the given market.
-    fn is_weekend(&self, weekday: Weekday) -> bool;
-}
+use super::holiday::Holiday;
 
 // -------------------------------------------------------------------------------------------------
 
@@ -55,13 +18,13 @@ pub trait Holiday {
 /// holiday schedule.
 #[derive(Clone)]
 pub struct Calendar {
-    holiday: Arc<dyn Holiday>,
+    holiday: Holiday,
     added_holidays: HashSet<Date>,
     removed_holidays: HashSet<Date>,
 }
 
 impl Calendar {
-    pub(crate) fn new(holiday: Arc<dyn Holiday>) -> Self {
+    pub(crate) fn new(holiday: Holiday) -> Self {
         Self {
             holiday,
             added_holidays: HashSet::new(),
@@ -472,8 +435,8 @@ const ORTHODOX_EASTER_MONDAYS: [Natural; 300] = [
 #[cfg(test)]
 mod test {
     use crate::datetime::{
-        calendars::{brazil::Brazil, target::Target},
         date::Date,
+        holidays::{brazil::Brazil, target::Target},
         months::Month,
         period::Period,
         timeunit::TimeUnit,

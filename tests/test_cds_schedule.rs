@@ -4,7 +4,7 @@ use rust_quantlib::context::pricing_context::PricingContext;
 use rust_quantlib::instruments::creditdefaultswap::cds_maturity;
 use rust_quantlib::datetime::{
     businessdayconvention::BusinessDayConvention,
-    calendars::weekendsonly::WeekendsOnly,
+    holidays::weekendsonly::WeekendsOnly,
     date::Date,
     dategenerationrule::DateGenerationRule,
     months::Month::*,

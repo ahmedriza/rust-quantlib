@@ -11,14 +11,12 @@
 //! can be found in the [examples](https://github.com/ahmedriza/rust-quantlib/tree/master/examples)
 //! directory of the source. We will add more examples there as work on the library progresses.
 //!
-//! See [C++ Bond Example](<https://github.com/lballabio/QuantLib/blob/master/Examples/Bonds/Bonds.cpp>)
-//! for the original QuantLib C++ version of the following example.
 //!
 //! ```no_run
 //! use rust_quantlib::context::pricing_context::PricingContext;
 //! use rust_quantlib::quotes::simplequote::SimpleQuote;
 //! use rust_quantlib::datetime::{
-//!    calendars::target::Target, date::Date,
+//!    holidays::target::Target, date::Date,
 //!    months::Month::*, timeunit::TimeUnit::*,
 //! };
 //!

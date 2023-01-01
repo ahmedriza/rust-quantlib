@@ -5,10 +5,9 @@ use crate::maths::bounds::lower_bound;
 use crate::types::{Integer, Size};
 
 use crate::datetime::{
-    businessdayconvention::BusinessDayConvention, calendar::Calendar,
-    calendars::nullcalendar::NullCalendar, date::Date,
-    dategenerationrule::DateGenerationRule, imm::IMM, period::Period, timeunit::TimeUnit::*,
-    weekday::Weekday::*,
+    businessdayconvention::BusinessDayConvention, calendar::Calendar, date::Date,
+    dategenerationrule::DateGenerationRule, holidays::nilholiday::NilHoliday, imm::IMM,
+    period::Period, timeunit::TimeUnit::*, weekday::Weekday::*,
 };
 
 // -------------------------------------------------------------------------------------------------
@@ -336,7 +335,7 @@ impl Schedule {
         }
 
         // calendar needed for endOfMonth adjustment
-        let null_calendar = NullCalendar::new();
+        let nil_holiday = NilHoliday::new();
         let mut periods = 1;
         let mut seed = Date::default();
         let mut exit_date = Date::default();
@@ -353,7 +352,7 @@ impl Schedule {
                 if result.next_to_last_date != Date::default() {
                     result.dates.insert(0, result.next_to_last_date); // add to front
                     let period = result.tenor * (-periods);
-                    let temp = null_calendar.advance_by_period(
+                    let temp = nil_holiday.advance_by_period(
                         seed,
                         &period,
                         result.convention,
@@ -372,7 +371,7 @@ impl Schedule {
                 }
                 loop {
                     let period = result.tenor * (-periods);
-                    let temp = null_calendar.advance_by_period(
+                    let temp = nil_holiday.advance_by_period(
                         seed,
                         &period,
                         result.convention,
@@ -448,7 +447,7 @@ impl Schedule {
                 if result.first_date != Date::default() {
                     result.dates.push(result.first_date);
                     let period = result.tenor * periods;
-                    let temp = null_calendar.advance_by_period(
+                    let temp = nil_holiday.advance_by_period(
                         seed,
                         &period,
                         convention,
@@ -493,7 +492,7 @@ impl Schedule {
 
                 loop {
                     let period = result.tenor * periods;
-                    let temp = null_calendar.advance_by_period(
+                    let temp = nil_holiday.advance_by_period(
                         seed,
                         &period,
                         convention,
@@ -863,7 +862,7 @@ mod test {
     use crate::context::pricing_context::PricingContext;
     use crate::datetime::{
         businessdayconvention::BusinessDayConvention,
-        calendars::{japan::Japan, target::Target, unitedstates::UnitedStates},
+        holidays::{japan::Japan, target::Target, unitedstates::UnitedStates},
         date::Date,
         frequency::Frequency,
         months::Month::*,

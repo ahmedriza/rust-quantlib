@@ -2,13 +2,14 @@ use crate::types::{Integer, Natural, Time};
 
 pub mod businessdayconvention;
 pub mod calendar;
-pub mod calendars;
 pub mod compounding;
 pub mod date;
 pub mod dategenerationrule;
 pub mod daycounter;
 pub mod daycounters;
 pub mod frequency;
+pub mod holiday;
+pub mod holidays;
 pub mod imm;
 pub mod interestrate;
 pub mod months;
@@ -16,6 +17,7 @@ pub mod period;
 pub mod schedule;
 pub mod timeunit;
 pub mod weekday;
+pub mod weekend;
 
 pub type Day = Natural;
 

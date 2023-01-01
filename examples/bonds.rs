@@ -1,7 +1,7 @@
 use rust_quantlib::context::pricing_context::PricingContext;
 use rust_quantlib::quotes::simplequote::SimpleQuote;
 use rust_quantlib::datetime::{
-    calendars::target::Target, date::Date,
+    holidays::target::Target, date::Date,
     months::Month::*, timeunit::TimeUnit::*,
 };
 
