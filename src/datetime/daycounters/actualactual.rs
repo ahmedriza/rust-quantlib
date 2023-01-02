@@ -415,7 +415,6 @@ impl AFB {
         d2 - d1
     }
 
-    #[allow(unused)]
     pub fn year_fraction(
         &self,
         d1: &Date,
@@ -423,7 +422,40 @@ impl AFB {
         ref_period_start: &Date,
         ref_period_end: &Date,
     ) -> Time {
-        todo!()
+        if d1 == d2 {
+            return 0.0;
+        }
+        if d1 > d2 {
+            return -self.year_fraction(d2, d1, ref_period_start, ref_period_end);
+        }
+
+        let mut new_d2 = *d2;
+        let mut temp = *d2;
+        let mut sum = 0.0;
+        while &temp > d1 {
+            temp = new_d2 - Period::new(1, Years);
+            if temp.day_of_month() == 28 && temp.month() == February && Date::is_leap(temp.year()) {
+                temp += 1;
+            }
+            if &temp >= d1 {
+                sum += 1.0;
+                new_d2 = temp;
+            }
+        }
+
+        let mut den = 365.0;
+        if Date::is_leap(new_d2.year()) {
+            temp = Date::new(29, February, new_d2.year());
+            if new_d2 > temp && d1 <= &temp {
+                den += 1.0;
+            }
+        } else if Date::is_leap(d1.year()) {
+            temp = Date::new(29, February, d1.year());
+            if new_d2 > temp && d1 <= &temp {
+                den += 1.0;
+            }
+        }
+        sum + Date::days_between(d1, &new_d2) / den
     }
 }
 
@@ -620,6 +652,7 @@ mod test {
                 Date::new(30, July, 2000),
                 0.417582417582,
             ),
+            // first example
             ActualActualTestCase::new(
                 DayCounter::actual_actual_isda(),
                 Date::new(1, November, 2003),
@@ -628,9 +661,25 @@ mod test {
                 Date::default(),
                 0.497724380567,
             ),
+            ActualActualTestCase::new(
+                DayCounter::actual_actual_afb(),
+                Date::new(1, November, 2003),
+                Date::new(1, May, 2004),
+                Date::default(),
+                Date::default(),
+                0.497267759563,
+            ),
             // short first calculation period (first period)
             ActualActualTestCase::new(
                 DayCounter::actual_actual_isda(),
+                Date::new(1, February, 1999),
+                Date::new(1, July, 1999),
+                Date::default(),
+                Date::default(),
+                0.410958904110,
+            ),
+            ActualActualTestCase::new(
+                DayCounter::actual_actual_afb(),
                 Date::new(1, February, 1999),
                 Date::new(1, July, 1999),
                 Date::default(),
@@ -646,9 +695,25 @@ mod test {
                 Date::default(),
                 1.001377348600,
             ),
+            ActualActualTestCase::new(
+                DayCounter::actual_actual_afb(),
+                Date::new(1, July, 1999),
+                Date::new(1, July, 2000),
+                Date::default(),
+                Date::default(),
+                1.000000000000,
+            ),
             // long first calculation period (first period)
             ActualActualTestCase::new(
                 DayCounter::actual_actual_isda(),
+                Date::new(15, August, 2002),
+                Date::new(15, July, 2003),
+                Date::default(),
+                Date::default(),
+                0.915068493151,
+            ),
+            ActualActualTestCase::new(
+                DayCounter::actual_actual_afb(),
                 Date::new(15, August, 2002),
                 Date::new(15, July, 2003),
                 Date::default(),
@@ -665,6 +730,14 @@ mod test {
                 Date::default(),
                 0.504004790778,
             ),
+            ActualActualTestCase::new(
+                DayCounter::actual_actual_afb(),
+                Date::new(15, July, 2003),
+                Date::new(15, January, 2004),
+                Date::default(),
+                Date::default(),
+                0.504109589041,
+            ),
             // short final calculation period (penultimate period)
             ActualActualTestCase::new(
                 DayCounter::actual_actual_isda(),
@@ -674,6 +747,14 @@ mod test {
                 Date::default(),
                 0.503892506924,
             ),
+            ActualActualTestCase::new(
+                DayCounter::actual_actual_afb(),
+                Date::new(30, July, 1999),
+                Date::new(30, January, 2000),
+                Date::default(),
+                Date::default(),
+                0.504109589041,
+            ),
             // short final calculation period (final period)
             ActualActualTestCase::new(
                 DayCounter::actual_actual_isda(),
@@ -682,6 +763,14 @@ mod test {
                 Date::default(),
                 Date::default(),
                 0.415300546448,
+            ),
+            ActualActualTestCase::new(
+                DayCounter::actual_actual_afb(),
+                Date::new(30, January, 2000),
+                Date::new(30, June, 2000),
+                Date::default(),
+                Date::default(),
+                0.41530054644,
             ),
         ];
 
