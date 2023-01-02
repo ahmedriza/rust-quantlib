@@ -67,9 +67,9 @@ impl DayCounter {
     /// Return an instance of an Actual/Actual ISMA day counter
     pub fn actual_actual_isma(schedule: Schedule) -> DayCounter {
         DayCounter::ActualActual(ActualActual {
-            convention: super::daycounters::actualactual::ActualActualConvention::ISMA(
+            convention: super::daycounters::actualactual::ActualActualConvention::ISMA(Box::new(
                 actualactual::ISMA { schedule },
-            ),
+            )),
         })
     }
 

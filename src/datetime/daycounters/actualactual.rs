@@ -13,7 +13,7 @@ pub struct ActualActual {
 
 #[derive(Clone)]
 pub enum ActualActualConvention {
-    ISMA(ISMA),
+    ISMA(Box<ISMA>),
     OldISMA(OldISMA),
     ISDA(ISDA),
     AFB(AFB),
