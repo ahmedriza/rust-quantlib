@@ -6,6 +6,15 @@ use crate::{
 };
 
 /// Actual/Actual day count convention
+///
+/// The day count can be calculated according to:
+/// * the ISDA convention, also known as "Actual/Actual (Historical)",  "Actual/Actual",
+///   "Act/Act", and according to ISDA also "Actual/365", "Act/365", and "A/365";
+/// * the ISMA and US Treasury convention, also known as "Actual/Actual (Bond)";
+/// * the AFB convention, also known as "Actual/Actual (Euro)".
+///
+/// For more details, refer to
+/// <https://www.isda.org/a/pIJEE/The-Actual-Actual-Day-Count-Fraction-1999.pdf>
 #[derive(Clone)]
 pub struct ActualActual {
     pub convention: ActualActualConvention,

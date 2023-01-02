@@ -19,6 +19,7 @@ use super::{
 /// Day count conventions
 #[derive(Clone)]
 pub enum DayCounter {
+    /// Actual/Actual day count convention
     ActualActual(ActualActual),
     /// Actual/360 day count convention, also known as "Act/360", or "A/360".
     Actual360(Actual360),

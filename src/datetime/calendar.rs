@@ -282,7 +282,7 @@ impl Calendar {
     }
 
     /// Advances the given date as specified by the given period and returns the result.
-    pub fn advance_by_period(        
+    pub fn advance_by_period(
         &self,
         date: Date,
         period: Period,
@@ -293,7 +293,7 @@ impl Calendar {
     }
 
     /// Calculates the number of business days between two given dates and returns the result.
-    #[allow(clippy::comparison_chain)]    
+    #[allow(clippy::comparison_chain)]
     pub fn business_days_between(
         &self,
         from: Date,

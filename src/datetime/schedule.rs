@@ -670,13 +670,13 @@ impl Schedule {
     pub fn business_day_convention(&self) -> BusinessDayConvention {
         self.convention
     }
-    
+
     /// Return a reference to the [Calendar]
     pub fn calendar(&self) -> &Calendar {
         &self.calendar
     }
-    
-    /// Return a copy of the dates 
+
+    /// Return a copy of the dates
     pub fn dates(&self) -> Vec<Date> {
         self.dates.clone()
     }
