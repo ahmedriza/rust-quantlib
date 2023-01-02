@@ -605,63 +605,15 @@ mod test {
     #[test]
     fn test_actual_actual() {
         let test_cases = vec![
-            ActualActualTestCase::new(
-                DayCounter::actual_actual_old_isma(),
-                Date::new(1, November, 2003),
-                Date::new(1, May, 2004),
-                Date::new(1, November, 2003),
-                Date::new(1, May, 2004),
-                0.500000000000,
-            ),
-            ActualActualTestCase::new(
-                DayCounter::actual_actual_old_isma(),
-                Date::new(1, February, 1999),
-                Date::new(1, July, 1999),
-                Date::new(1, July, 1998),
-                Date::new(1, July, 1999),
-                0.410958904110,
-            ),
-            ActualActualTestCase::new(
-                DayCounter::actual_actual_old_isma(),
-                Date::new(1, July, 1999),
-                Date::new(1, July, 2000),
-                Date::new(1, July, 1999),
-                Date::new(1, July, 2000),
-                1.000000000000,
-            ),
-            ActualActualTestCase::new(
-                DayCounter::actual_actual_old_isma(),
-                Date::new(15, August, 2002),
-                Date::new(15, July, 2003),
-                Date::new(15, January, 2003),
-                Date::new(15, July, 2003),
-                0.915760869565,
-            ),
-            ActualActualTestCase::new(
-                DayCounter::actual_actual_old_isma(),
-                Date::new(15, July, 2003),
-                Date::new(15, January, 2004),
-                Date::new(15, July, 2003),
-                Date::new(15, January, 2004),
-                0.500000000000,
-            ),
-            ActualActualTestCase::new(
-                DayCounter::actual_actual_old_isma(),
-                Date::new(30, July, 1999),
-                Date::new(30, January, 2000),
-                Date::new(30, July, 1999),
-                Date::new(30, January, 2000),
-                0.500000000000,
-            ),
-            ActualActualTestCase::new(
-                DayCounter::actual_actual_old_isma(),
-                Date::new(30, January, 2000),
-                Date::new(30, June, 2000),
-                Date::new(30, January, 2000),
-                Date::new(30, July, 2000),
-                0.417582417582,
-            ),
             // first example
+            ActualActualTestCase::new(
+                DayCounter::actual_actual_old_isma(),
+                Date::new(1, November, 2003),
+                Date::new(1, May, 2004),
+                Date::new(1, November, 2003),
+                Date::new(1, May, 2004),
+                0.500000000000,
+            ),
             ActualActualTestCase::new(
                 DayCounter::actual_actual_isda(),
                 Date::new(1, November, 2003),
@@ -680,6 +632,14 @@ mod test {
             ),
             // short first calculation period (first period)
             ActualActualTestCase::new(
+                DayCounter::actual_actual_old_isma(),
+                Date::new(1, February, 1999),
+                Date::new(1, July, 1999),
+                Date::new(1, July, 1998),
+                Date::new(1, July, 1999),
+                0.410958904110,
+            ),
+            ActualActualTestCase::new(
                 DayCounter::actual_actual_isda(),
                 Date::new(1, February, 1999),
                 Date::new(1, July, 1999),
@@ -697,6 +657,14 @@ mod test {
             ),
             // short first calculation period (second period)
             ActualActualTestCase::new(
+                DayCounter::actual_actual_old_isma(),
+                Date::new(1, July, 1999),
+                Date::new(1, July, 2000),
+                Date::new(1, July, 1999),
+                Date::new(1, July, 2000),
+                1.000000000000,
+            ),
+            ActualActualTestCase::new(
                 DayCounter::actual_actual_isda(),
                 Date::new(1, July, 1999),
                 Date::new(1, July, 2000),
@@ -713,6 +681,14 @@ mod test {
                 1.000000000000,
             ),
             // long first calculation period (first period)
+            ActualActualTestCase::new(
+                DayCounter::actual_actual_old_isma(),
+                Date::new(15, August, 2002),
+                Date::new(15, July, 2003),
+                Date::new(15, January, 2003),
+                Date::new(15, July, 2003),
+                0.915760869565,
+            ),
             ActualActualTestCase::new(
                 DayCounter::actual_actual_isda(),
                 Date::new(15, August, 2002),
@@ -732,6 +708,14 @@ mod test {
             // long first calculation period (second period)
             /* Warning: the ISDA case is in disagreement with mktc1198.pdf */
             ActualActualTestCase::new(
+                DayCounter::actual_actual_old_isma(),
+                Date::new(15, July, 2003),
+                Date::new(15, January, 2004),
+                Date::new(15, July, 2003),
+                Date::new(15, January, 2004),
+                0.500000000000,
+            ),
+            ActualActualTestCase::new(
                 DayCounter::actual_actual_isda(),
                 Date::new(15, July, 2003),
                 Date::new(15, January, 2004),
@@ -749,6 +733,14 @@ mod test {
             ),
             // short final calculation period (penultimate period)
             ActualActualTestCase::new(
+                DayCounter::actual_actual_old_isma(),
+                Date::new(30, July, 1999),
+                Date::new(30, January, 2000),
+                Date::new(30, July, 1999),
+                Date::new(30, January, 2000),
+                0.500000000000,
+            ),
+            ActualActualTestCase::new(
                 DayCounter::actual_actual_isda(),
                 Date::new(30, July, 1999),
                 Date::new(30, January, 2000),
@@ -765,6 +757,14 @@ mod test {
                 0.504109589041,
             ),
             // short final calculation period (final period)
+            ActualActualTestCase::new(
+                DayCounter::actual_actual_old_isma(),
+                Date::new(30, January, 2000),
+                Date::new(30, June, 2000),
+                Date::new(30, January, 2000),
+                Date::new(30, July, 2000),
+                0.417582417582,
+            ),
             ActualActualTestCase::new(
                 DayCounter::actual_actual_isda(),
                 Date::new(30, January, 2000),
