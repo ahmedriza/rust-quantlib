@@ -19,10 +19,7 @@ impl SimpleCashFlow {
 }
 
 impl CashFlow for SimpleCashFlow {
-    fn accurued_amount(
-        &self,
-        _settlement_date: Date,
-    ) -> Real {
+    fn accurued_amount(&self, _settlement_date: Date) -> Real {
         0.0
     }
 
@@ -51,10 +48,7 @@ impl Redemption {
 }
 
 impl CashFlow for Redemption {
-    fn accurued_amount(
-        &self,
-        _settlement_date: Date,
-    ) -> Real {
+    fn accurued_amount(&self, _settlement_date: Date) -> Real {
         0.0
     }
 
@@ -83,10 +77,7 @@ impl AmortizingPayment {
 }
 
 impl CashFlow for AmortizingPayment {
-    fn accurued_amount(
-        &self,
-        _settlement_date: Date,
-    ) -> Real {
+    fn accurued_amount(&self, _settlement_date: Date) -> Real {
         0.0
     }
 

@@ -17,14 +17,7 @@ pub trait Solver1D: private::SolverDetail {
     /// * `derivative` - derivative of function `f(x)` that provides derivative at input `x`
     /// * `guess` - initial guess
     /// * `step` - step used to increase or decrease the guess at each iteration
-    fn solve<F, G>(
-        &self,
-        f: F,
-        derivative: G,
-        accuracy: Real,
-        guess: Real,
-        step: Real
-    ) -> Real
+    fn solve<F, G>(&self, f: F, derivative: G, accuracy: Real, guess: Real, step: Real) -> Real
     where
         F: Fn(Real) -> Real,
         G: Fn(Real) -> Real,
@@ -118,7 +111,7 @@ pub trait Solver1D: private::SolverDetail {
         accuracy: Real,
         guess: Real,
         xmin: Real,
-        xmax: Real
+        xmax: Real,
     ) -> Real
     where
         F: Fn(Real) -> Real,

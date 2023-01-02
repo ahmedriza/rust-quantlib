@@ -77,7 +77,7 @@ impl Bond for ZeroCouponBond {
         }
         bondfunctions::accrued_amount(self, settlement_date)
     }
-    
+
     fn bond_yield(
         &self,
         clean_price: Real,
