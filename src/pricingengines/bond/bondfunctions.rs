@@ -19,5 +19,6 @@ pub fn bond_yield(
     guess: Real,
     price_type: BondPriceType,
 ) -> Rate {
-    todo!()
+    // TODO 
+    0.0
 }
