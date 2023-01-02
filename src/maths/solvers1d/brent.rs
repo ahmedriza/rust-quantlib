@@ -36,7 +36,11 @@ impl Solver1D for Brent {}
 impl private::SolverDetail for Brent {
     /// The implementation of the algorithm was inspired by Press, Teukolsky, Vetterling, and
     /// Flannery, "Numerical Recipes in C", 2nd edition, Cambridge University Press
-    fn solve_impl<F: Fn(Real) -> Real>(&self, f: F, accuracy: Real, sd: &mut SolverData) -> Real {
+    fn solve_impl<F, G>(&self, f: F, _derivative: G, accuracy: Real, sd: &mut SolverData) -> Real
+    where
+        F: Fn(Real) -> Real,
+        G: Fn(Real) -> Real,
+    {
         // we want to start with root (which equals the guess) on one side of the bracket and both
         // xmin and xmax on the other.
         let mut f_root = f(sd.root);

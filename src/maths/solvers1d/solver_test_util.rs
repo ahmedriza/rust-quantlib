@@ -50,7 +50,7 @@ where
 {
     let accuracies = vec![1.0e-4, 1.0e-6, 1.0e-8];
     for accuracy in accuracies {
-        let root = solver.solve(&f, accuracy, guess, 0.1);
+        let root = solver.solve(&f, |_| 0.0, accuracy, guess, 0.1);
         assert!(
             (root - expected).abs() <= accuracy,
             "{} solver (not bracketed), expected: {}, calculated: {}, accuracy: {}",
@@ -77,7 +77,7 @@ pub(crate) fn test_bracketed<S, F>(
     let accuracies = vec![1.0e-4, 1.0e-6, 1.0e-8];
     for accuracy in accuracies {
         // guess on the left side of the root, increasing function
-        let root = solver.solve_bracketed(&f, accuracy, guess, xmin, xmax);
+        let root = solver.solve_bracketed(&f, |_y| 0.0, accuracy, guess, xmin, xmax);
         assert!(
             (root - expected).abs() <= accuracy,
             "{} solver (bracketed), expected: {}, calculated: {}, accuracy: {}",

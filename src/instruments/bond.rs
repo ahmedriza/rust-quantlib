@@ -1,22 +1,27 @@
 use crate::{
+    cashflows::cashflow::Leg,
     datetime::{
         calendar::Calendar, date::Date, daycounter::DayCounter, frequency::Frequency,
         timeunit::TimeUnit::Days,
     },
+    maths::bounds::lower_bound,
     rates::compounding::Compounding,
-    types::{Integer, Rate, Real, Size}, maths::bounds::lower_bound,
+    types::{Integer, Rate, Real, Size},
 };
 
+#[derive(Debug, PartialEq, Eq, PartialOrd, Ord)]
 pub enum BondPriceType {
     Clean,
     Dirty,
 }
 
 pub trait Bond {
+    fn accrued_amount(&self, settlement_date: Date) -> Real;
+
     #[allow(clippy::too_many_arguments)]
-    /// Calculate the yield given a (clean) price and settlement date. 
-    /// 
-    /// The settlement date can default to the evaluation date. 
+    /// Calculate the yield given a (clean) price and settlement date.
+    ///
+    /// The settlement date can default to the evaluation date.
     fn bond_yield(
         &self,
         clean_price: Real,
@@ -33,17 +38,23 @@ pub trait Bond {
     /// Return the [Calendar] associated with this Bond
     fn calendar(&self) -> &Calendar;
 
-    /// Return the Bond issue date 
+    /// Return the cashflows
+    fn cashflows(&self) -> &Leg;
+
+    /// Return the Bond issue date
     fn issue_date(&self) -> Date;
+
+    /// Return the maturity date
+    fn maturity_date(&self) -> Date;
 
     /// Return the notional schedule dates
     fn notional_schedule(&self) -> &Vec<Date>;
-    
+
     fn notional(&self, date: Date) -> Real {
         let notional_schedule = self.notional_schedule();
-        let last_notional_schedule = notional_schedule.last().expect(
-            "Notional schedule is empty"
-        );
+        let last_notional_schedule = notional_schedule
+            .last()
+            .expect("Notional schedule is empty");
         if &date > last_notional_schedule {
             // after maturity
             return 0.0;
@@ -67,7 +78,7 @@ pub trait Bond {
     /// Return the notionals
     fn notionals(&self) -> &Vec<Real>;
 
-    /// Calculate the settlement date 
+    /// Calculate the settlement date
     fn settlement_date(&self, date: Date) -> Date {
         // usually, the settlement is at T+n...
         let settlement = self.calendar().advance_by_days_with_following(

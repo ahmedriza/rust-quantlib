@@ -31,12 +31,17 @@ impl FiniteDifferenceNewtonSafe {
 impl Solver1D for FiniteDifferenceNewtonSafe {}
 
 impl private::SolverDetail for FiniteDifferenceNewtonSafe {
-    fn solve_impl<F: Fn(Real) -> Real>(
+    fn solve_impl<F, G>(
         &self,
         f: F,
+        _derivative: G,
         accuracy: Real,
         sd: &mut private::SolverData,
-    ) -> Real {
+    ) -> Real
+    where
+        F: Fn(Real) -> Real,
+        G: Fn(Real) -> Real,
+    {
         // Orient the search so that f(xl) < 0
         let mut xh;
         let mut xl;

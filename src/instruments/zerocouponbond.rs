@@ -70,7 +70,14 @@ impl ZeroCouponBond {
 }
 
 impl Bond for ZeroCouponBond {
-    #[allow(unused)]
+    fn accrued_amount(&self, settlement_date: Date) -> Real {
+        let current_notional = self.notional(settlement_date);
+        if current_notional == 0.0 {
+            return 0.0;
+        }
+        bondfunctions::accrued_amount(self, settlement_date)
+    }
+    
     fn bond_yield(
         &self,
         clean_price: Real,
@@ -111,8 +118,16 @@ impl Bond for ZeroCouponBond {
         &self.calendar
     }
 
+    fn cashflows(&self) -> &Leg {
+        &self.cashflows
+    }
+
     fn issue_date(&self) -> Date {
         self.issue_date
+    }
+
+    fn maturity_date(&self) -> Date {
+        self.maturity_date
     }
 
     fn notional_schedule(&self) -> &Vec<Date> {

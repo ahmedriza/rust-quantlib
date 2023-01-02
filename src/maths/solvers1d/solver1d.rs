@@ -13,12 +13,21 @@ pub trait Solver1D: private::SolverDetail {
     ///
     /// # Arguments
     ///
-    /// * `f` - function that we need to solve
+    /// * `f` - function `f(x)` that provides the value at input `x` (function to solve for root)
+    /// * `derivative` - derivative of function `f(x)` that provides derivative at input `x`
     /// * `guess` - initial guess
     /// * `step` - step used to increase or decrease the guess at each iteration
-    fn solve<F>(&self, f: F, accuracy: Real, guess: Real, step: Real) -> Real
+    fn solve<F, G>(
+        &self,
+        f: F,
+        derivative: G,
+        accuracy: Real,
+        guess: Real,
+        step: Real
+    ) -> Real
     where
         F: Fn(Real) -> Real,
+        G: Fn(Real) -> Real,
     {
         assert!(accuracy > 0.0, "accurancy ({}) must be positive", accuracy);
         // check whether we really want to use epsilon
@@ -55,7 +64,7 @@ pub trait Solver1D: private::SolverDetail {
                     return sd.xmax;
                 }
                 sd.root = (sd.xmax + sd.xmin) / 2.0;
-                return self.solve_impl(f, accuracy, &mut sd);
+                return self.solve_impl(f, derivative, accuracy, &mut sd);
             }
             if sd.fx_min.abs() < sd.fx_max.abs() {
                 sd.xmin = self.enforce_bounds(sd.xmin + growth_factor * (sd.xmin - sd.xmax));
@@ -102,9 +111,18 @@ pub trait Solver1D: private::SolverDetail {
     /// * `guess` - initial guess
     /// * `xmin` - minimum value of `x` for bracketing
     /// * `xmax` - maximum value of `x` for bracketing
-    fn solve_bracketed<F>(&self, f: F, accuracy: Real, guess: Real, xmin: Real, xmax: Real) -> Real
+    fn solve_bracketed<F, G>(
+        &self,
+        f: F,
+        derivative: G,
+        accuracy: Real,
+        guess: Real,
+        xmin: Real,
+        xmax: Real
+    ) -> Real
     where
         F: Fn(Real) -> Real,
+        G: Fn(Real) -> Real,
     {
         assert!(accuracy > 0.0, "accurancy ({}) must be positive", accuracy);
         // check whether we really want to use epsilon
@@ -159,7 +177,7 @@ pub trait Solver1D: private::SolverDetail {
         assert!(guess < sd.xmax, "guess ({}) > xmax ({})", guess, sd.xmax);
 
         sd.root = guess;
-        self.solve_impl(f, accuracy, &mut sd)
+        self.solve_impl(f, derivative, accuracy, &mut sd)
     }
 }
 
@@ -180,9 +198,10 @@ pub(crate) mod private {
     }
 
     pub trait SolverDetail {
-        fn solve_impl<F: Fn(Real) -> Real>(
+        fn solve_impl<F: Fn(Real) -> Real, G: Fn(Real) -> Real>(
             &self,
             f: F,
+            derivative: G,
             accuracy: Real,
             solver_data: &mut SolverData,
         ) -> Real;
