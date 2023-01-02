@@ -20,7 +20,7 @@ pub enum ActualActualConvention {
 }
 
 impl ActualActual {
-    /// Return the name of the day counter    
+    /// Return the name of the day counter
     pub fn name(&self) -> String {
         match &self.convention {
             ActualActualConvention::ISMA(c) => c.name(),
