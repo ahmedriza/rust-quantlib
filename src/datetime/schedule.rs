@@ -354,7 +354,7 @@ impl Schedule {
                     let period = result.tenor * (-periods);
                     let temp = nil_holiday.advance_by_period(
                         seed,
-                        &period,
+                        period,
                         result.convention,
                         result.end_of_month,
                     );
@@ -373,7 +373,7 @@ impl Schedule {
                     let period = result.tenor * (-periods);
                     let temp = nil_holiday.advance_by_period(
                         seed,
-                        &period,
+                        period,
                         result.convention,
                         result.end_of_month,
                     );
@@ -449,7 +449,7 @@ impl Schedule {
                     let period = result.tenor * periods;
                     let temp = nil_holiday.advance_by_period(
                         seed,
-                        &period,
+                        period,
                         convention,
                         result.end_of_month,
                     );
@@ -494,7 +494,7 @@ impl Schedule {
                     let period = result.tenor * periods;
                     let temp = nil_holiday.advance_by_period(
                         seed,
-                        &period,
+                        period,
                         convention,
                         result.end_of_month,
                     );
@@ -667,9 +667,32 @@ impl Schedule {
         result
     }
 
+    pub fn business_day_convention(&self) -> BusinessDayConvention {
+        self.convention
+    }
+    
+    /// Return a reference to the [Calendar]
+    pub fn calendar(&self) -> &Calendar {
+        &self.calendar
+    }
+    
+    /// Return a copy of the dates 
+    pub fn dates(&self) -> Vec<Date> {
+        self.dates.clone()
+    }
+
+    pub fn end_of_month(&self) -> bool {
+        self.end_of_month
+    }
+
     /// Size of the schedule, i.e. the number of dates.
     pub fn size(&self) -> Size {
         self.dates.len()
+    }
+
+    /// Return the tenor ([Period])
+    pub fn tenor(&self) -> Period {
+        self.tenor
     }
 
     /// Return the first date that is bigger than `ref_date` in the schedule.

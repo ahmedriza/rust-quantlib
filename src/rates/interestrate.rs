@@ -158,7 +158,7 @@ impl InterestRate {
                 }
             }
         };
-        InterestRate::new(r, *result_dc, compounding.clone(), frequency)
+        InterestRate::new(r, result_dc.clone(), compounding.clone(), frequency)
     }
 
     #[allow(clippy::too_many_arguments)]

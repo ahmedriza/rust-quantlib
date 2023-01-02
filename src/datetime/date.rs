@@ -42,6 +42,12 @@ impl PartialOrd for Date {
     }
 }
 
+impl Ord for Date {
+    fn cmp(&self, other: &Self) -> std::cmp::Ordering {
+        self.serial_number.cmp(&other.serial_number)
+    }
+}
+
 // -------------------------------------------------------------------------------------------------
 
 impl Hash for Date {

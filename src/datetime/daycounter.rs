@@ -7,16 +7,19 @@ use super::{
     daycounters::{
         actual360::Actual360,
         actual366::Actual366,
+        actualactual::{self, ActualActual},
         one::One,
         simple::Simple,
-        thirty360::{Thirty360, Thiry360Convention, EU, ISDA, ISMA, IT, NASD, US},
+        thirty360::{self, Thirty360, Thiry360Convention, EU, ISDA, IT, NASD, US},
         thirty365::Thirty365,
     },
+    schedule::Schedule,
 };
 
 /// Day count conventions
-#[derive(Clone, Copy)]
+#[derive(Clone)]
 pub enum DayCounter {
+    ActualActual(ActualActual),
     /// Actual/360 day count convention, also known as "Act/360", or "A/360".
     Actual360(Actual360),
     /// Actual/366 day count convention, also known as "Act/366".
@@ -34,6 +37,7 @@ pub enum DayCounter {
 impl Debug for DayCounter {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         match self {
+            Self::ActualActual(dc) => write!(f, "{}", dc.name()),
             Self::Actual360(dc) => write!(f, "{}", dc.name()),
             Self::Actual366(dc) => write!(f, "{}", dc.name()),
             Self::One(dc) => write!(f, "{}", dc.name()),
@@ -47,6 +51,7 @@ impl Debug for DayCounter {
 impl PartialEq for DayCounter {
     fn eq(&self, other: &Self) -> bool {
         match (self, other) {
+            (Self::ActualActual(l0), Self::ActualActual(r0)) => l0.name() == r0.name(),
             (Self::Actual360(l0), Self::Actual360(r0)) => l0.name() == r0.name(),
             (Self::Actual366(l0), Self::Actual366(r0)) => l0.name() == r0.name(),
             (Self::One(l0), Self::One(r0)) => l0.name() == r0.name(),
@@ -59,6 +64,42 @@ impl PartialEq for DayCounter {
 }
 
 impl DayCounter {
+    /// Return an instance of an Actual/Actual ISMA day counter
+    pub fn actual_actual_isma(schedule: Schedule) -> DayCounter {
+        DayCounter::ActualActual(ActualActual {
+            convention: super::daycounters::actualactual::ActualActualConvention::ISMA(
+                actualactual::ISMA { schedule },
+            ),
+        })
+    }
+
+    /// Return an instance of an Actual/Actual Old ISMA day counter    
+    pub fn actual_actual_old_isma() -> DayCounter {
+        DayCounter::ActualActual(ActualActual {
+            convention: super::daycounters::actualactual::ActualActualConvention::OldISMA(
+                actualactual::OldISMA {},
+            ),
+        })
+    }
+
+    /// Return an instance of an Actual/Actual ISDA day counter    
+    pub fn actual_actual_isda() -> DayCounter {
+        DayCounter::ActualActual(ActualActual {
+            convention: super::daycounters::actualactual::ActualActualConvention::ISDA(
+                actualactual::ISDA {},
+            ),
+        })
+    }
+
+    /// Return an instance of an Actual/Actual AFB day counter    
+    pub fn actual_actual_afb() -> DayCounter {
+        DayCounter::ActualActual(ActualActual {
+            convention: super::daycounters::actualactual::ActualActualConvention::AFB(
+                actualactual::AFB {},
+            ),
+        })
+    }
+
     /// Return an instance of an [Actual360] day counter
     pub fn actual360() -> DayCounter {
         DayCounter::Actual360(Actual360::new())
@@ -79,7 +120,7 @@ impl DayCounter {
     /// Return an instance of a [Thirty360] day counter with ISMA conventions
     pub fn isma() -> DayCounter {
         DayCounter::Thirty360(Thirty360 {
-            convention: Thiry360Convention::ISMA(ISMA {}),
+            convention: Thiry360Convention::ISMA(thirty360::ISMA {}),
         })
     }
 
@@ -129,6 +170,7 @@ impl DayCounter {
     /// Return the name of the day counter
     pub fn name(&self) -> String {
         match self {
+            DayCounter::ActualActual(dc) => dc.name(),
             DayCounter::Actual360(dc) => dc.name(),
             DayCounter::Actual366(dc) => dc.name(),
             DayCounter::One(dc) => dc.name(),
@@ -141,6 +183,7 @@ impl DayCounter {
     /// Returns the number of days between two dates.
     pub fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
         match self {
+            DayCounter::ActualActual(dc) => dc.day_count(d1, d2),
             DayCounter::Actual360(dc) => dc.day_count(d1, d2),
             DayCounter::Actual366(dc) => dc.day_count(d1, d2),
             DayCounter::One(dc) => dc.day_count(d1, d2),
@@ -159,6 +202,9 @@ impl DayCounter {
         ref_period_end: &Date,
     ) -> Time {
         match self {
+            DayCounter::ActualActual(dc) => {
+                dc.year_fraction(d1, d2, ref_period_start, ref_period_end)
+            }
             DayCounter::Actual360(dc) => dc.year_fraction(d1, d2, ref_period_start, ref_period_end),
             DayCounter::Actual366(dc) => dc.year_fraction(d1, d2, ref_period_start, ref_period_end),
             DayCounter::One(dc) => dc.year_fraction(d1, d2, ref_period_start, ref_period_end),

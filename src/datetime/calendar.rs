@@ -275,17 +275,17 @@ impl Calendar {
     pub fn advance_by_period_with_following(
         &self,
         date: Date,
-        period: &Period,
+        period: Period,
         end_of_month: bool,
     ) -> Date {
         self.advance_by_period(date, period, BusinessDayConvention::Following, end_of_month)
     }
 
     /// Advances the given date as specified by the given period and returns the result.
-    pub fn advance_by_period(
+    pub fn advance_by_period(        
         &self,
         date: Date,
-        period: &Period,
+        period: Period,
         convention: BusinessDayConvention,
         end_of_month: bool,
     ) -> Date {
@@ -293,6 +293,7 @@ impl Calendar {
     }
 
     /// Calculates the number of business days between two given dates and returns the result.
+    #[allow(clippy::comparison_chain)]    
     pub fn business_days_between(
         &self,
         from: Date,
