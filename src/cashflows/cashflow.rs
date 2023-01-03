@@ -80,6 +80,9 @@ pub fn accurued_amount(
     result
 }
 
+/// Implied internal rate of return.
+/// The function verifies the theoretical existence of an IRR and numerically establishes the IRR
+/// to the desired precision.
 #[allow(clippy::too_many_arguments)]
 pub fn bond_yield(
     solver: &impl Solver1D,
@@ -129,6 +132,8 @@ pub fn next_cashflow(
     None
 }
 
+/// NPV of the cash flows.
+/// The NPV is the sum of the cash flows, each discounted according to the given term structure.
 pub fn npv(
     cashflows: &Leg,
     interestrate: &InterestRate,
@@ -159,7 +164,7 @@ pub fn npv(
         }
         let t = get_stepwise_discount_time(cf, daycounter, npv_date, last_date);
         let b = interestrate.discount_factor(t);
-        
+
         discount *= b;
         last_date = cf.date();
         npv += amount * discount;
@@ -167,8 +172,7 @@ pub fn npv(
     npv
 }
 
-/// Helper fucntion used to calculate Time-To-Discount for each stage when calculating discount
-/// factor stepwisely
+/// Calculate Time-To-Discount for each stage when calculating discount factor stepwisely
 pub fn get_stepwise_discount_time(
     cashflow: &Rc<dyn CashFlow>,
     daycounter: &DayCounter,
@@ -189,9 +193,15 @@ pub fn get_stepwise_discount_time(
     daycounter.year_fraction(&last_date, &cashflow_date, &ref_start_date, &ref_end_date)
 }
 
+///
+/// Calculate the modified duration which is defined as
+///
+/// D_modified = (−1/P)(∂P/∂y)
+///
+/// where `P` is the present value of the cash flows according to the given IRR `y`.
 pub fn modified_duration(
     cashflows: &Leg,
-    interestrate: &InterestRate,
+    y: &InterestRate,
     include_settlement_date_flows: bool,
     settlement_date: Date,
     npv_date: Date,
@@ -209,10 +219,10 @@ pub fn modified_duration(
     let mut p: Real = 0.0;
     let mut t: Time = 0.0;
     let mut dpdy: Real = 0.0;
-    let r: Rate = interestrate.rate;
-    let n = interestrate.frequency;
+    let r: Rate = y.rate;
+    let n = y.frequency;
     let mut last_date = npv_date;
-    let daycounter = &interestrate.daycounter;
+    let daycounter = &y.daycounter;
 
     for cf in cashflows {
         if cf.has_occurred(&settlement_date, include_settlement_date_flows) {
@@ -223,9 +233,9 @@ pub fn modified_duration(
             c = 0.0;
         }
         t += get_stepwise_discount_time(cf, daycounter, npv_date, last_date);
-        let discount_factor = interestrate.discount_factor(t);
+        let discount_factor = y.discount_factor(t);
         p += c * discount_factor;
-        match interestrate.compounding {
+        match y.compounding {
             Compounding::Simple => dpdy -= c * discount_factor * discount_factor * t,
             Compounding::Compounded => dpdy -= c * t * discount_factor / (1.0 + r / n),
             Compounding::Continuous => dpdy -= c * discount_factor * t,

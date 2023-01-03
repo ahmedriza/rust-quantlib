@@ -6,6 +6,8 @@ use crate::{
 
 use super::cashflow::{self, Leg};
 
+/// Provides functions to help in the calculation of the internal rate of return of bond
+/// cash flows. 
 pub struct IrrFinder<'a> {
     pub cashflows: &'a Leg,
     pub npv: Real,
@@ -41,6 +43,7 @@ impl<'a> IrrFinder<'a> {
         }
     }
 
+    /// Calculate the NPV of cash flows at the given yield point 
     pub fn at(&self, y: Rate) -> Real {
         // TODO remove the clones
         let bond_yield = InterestRate::new(
@@ -59,6 +62,7 @@ impl<'a> IrrFinder<'a> {
         self.npv - _npv
     }
 
+    /// Calculate the modified duration of bond cash flows at the given yield point 
     pub fn derivative(&self, y: Rate) -> Real {
         // TODO remove the clones
         let bond_yield = InterestRate::new(

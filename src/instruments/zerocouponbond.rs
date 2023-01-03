@@ -35,7 +35,7 @@ pub struct ZeroCouponBond {
 impl ZeroCouponBond {
     pub fn new(
         settlement_days: Integer,
-        calendar: Calendar,
+        calendar: &Calendar,
         face_amount: Real,
         maturity_date: Date,
         payment_convention: Option<BusinessDayConvention>,
@@ -55,7 +55,7 @@ impl ZeroCouponBond {
 
         Self {
             settlement_days,
-            calendar,
+            calendar: calendar.clone(),
             face_amount,
             maturity_date,
             payment_convention,
@@ -122,6 +122,15 @@ impl Bond for ZeroCouponBond {
         &self.cashflows
     }
 
+    fn dirty_price(&self, pricing_date: Date) -> Real {
+        let settlement_date = self.settlement_date(pricing_date);
+        let current_notional = self.notional(settlement_date);
+        if current_notional == 0.0 {
+            return 0.0;
+        }
+        todo!()
+    }
+
     fn issue_date(&self) -> Date {
         self.issue_date
     }
@@ -167,10 +176,10 @@ mod test {
         let settlement_date = pricing_context.eval_date + settlement_days;
         let calendar = UnitedStates::government_bond();
         let face_amount = 100.0;
-        let discount_yield = 0.851 / 100.0;        
+        let discount_yield = 0.851 / 100.0;
         let maturity_date = Date::new(5, July, 2022);
 
-        let zcb = ZeroCouponBond::new(1, calendar, face_amount, maturity_date, None, None, None);
+        let zcb = ZeroCouponBond::new(1, &calendar, face_amount, maturity_date, None, None, None);
         let clean_price = zcb_clean_price(discount_yield, maturity_date, settlement_date);
         let bond_yield = 100.0
             * zcb.bond_yield(

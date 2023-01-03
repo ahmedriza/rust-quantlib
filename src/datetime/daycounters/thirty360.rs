@@ -136,7 +136,9 @@ impl US {
             dd1 = 30;
         }
 
-        360 * (yy2 - yy1) + 30 * (mm2 as Integer - mm1 as Integer) + (dd2 - dd1) as Integer
+        360 * (yy2 - yy1)
+            + 30 * (mm2 as Integer - mm1 as Integer)
+            + (dd2 as Integer - dd1 as Integer) as Integer
     }
 
     pub fn year_fraction(
@@ -161,8 +163,8 @@ impl ISMA {
     }
 
     pub fn day_count(&self, d1: &Date, d2: &Date) -> Integer {
-        let mut dd1 = d1.day_of_month();
-        let mut dd2 = d2.day_of_month();
+        let mut dd1 = d1.day_of_month() as Integer;
+        let mut dd2 = d2.day_of_month() as Integer;
         let mm1 = d1.month() as Integer;
         let mm2 = d2.month() as Integer;
         let yy1 = d1.year();
@@ -174,7 +176,6 @@ impl ISMA {
         if dd2 == 31 && dd1 == 30 {
             dd2 = 30;
         }
-
         360 * (yy2 - yy1) + 30 * (mm2 - mm1) + (dd2 - dd1) as Integer
     }
 

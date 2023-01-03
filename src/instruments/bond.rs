@@ -41,6 +41,14 @@ pub trait Bond {
     /// Return the cashflows
     fn cashflows(&self) -> &Leg;
 
+    /// theoretical dirty price
+    /// The default bond settlement is used for calculation.
+    ///
+    /// The theoretical price calculated from a flat term structure might differ slightly from
+    /// the price calculated from the corresponding yield. If the price from a constant yield is
+    /// desired, it is advisable to use the other method that takes a constant yield.
+    fn dirty_price(&self, pricing_date: Date) -> Real;
+    
     /// Return the Bond issue date
     fn issue_date(&self) -> Date;
 
