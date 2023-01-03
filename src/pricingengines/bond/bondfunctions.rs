@@ -40,8 +40,8 @@ pub fn bond_yield(
     if price_type == BondPriceType::Clean {
         dirty_price += bond.accrued_amount(settlement_date);
     }
-    dirty_price = dirty_price / 100.0 / bond.notional(settlement_date);
-    println!("dirty price: {}", dirty_price);
+    let notional = bond.notional(settlement_date);
+    dirty_price /= (100.0 / notional);
 
     let solver = NewtonSafe::default();
     // TODO set max_evaluations

@@ -84,11 +84,11 @@ impl Bond for ZeroCouponBond {
         daycounter: DayCounter,
         compounding: Compounding,
         frequency: Frequency,
-        settlement_date: Date,             // Date::default()
-        accuracy: Option<Real>,            //  = 1.0e-8,
-        max_evaluations: Option<Size>,     //  = 100,
-        guess: Option<Real>,               //  = 0.05,
-        price_type: Option<BondPriceType>, // Clean
+        settlement_date: Date,
+        accuracy: Option<Real>,
+        max_evaluations: Option<Size>,
+        guess: Option<Real>,
+        price_type: Option<BondPriceType>,
     ) -> Rate {
         let accuracy = accuracy.unwrap_or(1.0e-8);
         let max_evaluations = max_evaluations.unwrap_or(100);
@@ -163,22 +163,30 @@ mod test {
     pub fn test_zero_coupon_bond() {
         let pricing_context = PricingContext::new(Date::new(6, June, 2022));
 
+        let settlement_days = 1;
+        let settlement_date = pricing_context.eval_date + settlement_days;
         let calendar = UnitedStates::government_bond();
         let face_amount = 100.0;
         let maturity_date = Date::new(5, July, 2022);
+
         let zcb = ZeroCouponBond::new(1, calendar, face_amount, maturity_date, None, None, None);
 
-        let clean_price = 99.0 + (18.0 + 3.0 / 4.0) / 32.0;
+        let discount_yield = 0.851 / 100.0;
+        let days = maturity_date - settlement_date;
+        let interest = 100.0 * discount_yield * days as f64 / 360.0;
+        let clean_price = 100.0 - interest;
+        println!("clean_price: {}", clean_price);
+
         let daycounter = DayCounter::actual_actual_old_isma();
         let compounding = Compounding::SimpleThenCompounded;
         let frequency = Semiannual;
 
-        let bond_yield = zcb.bond_yield(
+        let bond_yield = 100.0 * zcb.bond_yield(
             clean_price,
             daycounter,
             compounding,
             frequency,
-            pricing_context.eval_date,
+            settlement_date,
             None,
             None,
             None,

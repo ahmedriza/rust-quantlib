@@ -159,6 +159,7 @@ pub fn npv(
         }
         let t = get_stepwise_discount_time(cf, daycounter, npv_date, last_date);
         let b = interestrate.discount_factor(t);
+        
         discount *= b;
         last_date = cf.date();
         npv += amount * discount;
