@@ -171,7 +171,7 @@ mod test {
     use super::Brent;
 
     #[test]
-    fn test_brent_one() {
+    fn test_brent() {
         let solver = Brent::default();
         let name = "Brent";
 

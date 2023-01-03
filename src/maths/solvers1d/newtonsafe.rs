@@ -125,3 +125,20 @@ impl private::SolverDetail for NewtonSafe {
         self.upper_bound_enforced
     }
 }
+
+// -------------------------------------------------------------------------------------------------
+
+#[cfg(test)]
+mod test {
+    use crate::maths::solvers1d::solver_test_util::test_solver;
+
+    use super::NewtonSafe;
+
+    #[test]
+    fn test_newton_safe() {
+        let solver = NewtonSafe::default();
+        let name = "NewtonSafe";
+
+        test_solver(&solver, name);
+    }
+}
