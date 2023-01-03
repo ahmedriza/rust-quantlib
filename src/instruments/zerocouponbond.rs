@@ -155,6 +155,7 @@ mod test {
         },
         instruments::bond::Bond,
         rates::compounding::Compounding,
+        types::Real,
     };
 
     use super::ZeroCouponBond;
@@ -162,37 +163,50 @@ mod test {
     #[test]
     pub fn test_zero_coupon_bond() {
         let pricing_context = PricingContext::new(Date::new(6, June, 2022));
-
         let settlement_days = 1;
         let settlement_date = pricing_context.eval_date + settlement_days;
         let calendar = UnitedStates::government_bond();
         let face_amount = 100.0;
+        let discount_yield = 0.851 / 100.0;        
         let maturity_date = Date::new(5, July, 2022);
 
         let zcb = ZeroCouponBond::new(1, calendar, face_amount, maturity_date, None, None, None);
+        let clean_price = zcb_clean_price(discount_yield, maturity_date, settlement_date);
+        let bond_yield = 100.0
+            * zcb.bond_yield(
+                clean_price,
+                DayCounter::actual_actual_old_isma(),
+                Compounding::SimpleThenCompounded,
+                Semiannual,
+                settlement_date,
+                None,
+                None,
+                None,
+                None,
+            );
 
-        let discount_yield = 0.851 / 100.0;
+        let expected_clean_price = 99.93381111111111;
+        let expected_bond_yield = 0.8633917455289686;
+
+        assert!(
+            (expected_clean_price - clean_price).abs() < 1.0e-10,
+            "expected clean price: {}, actual clean price: {}, diff: {}",
+            expected_clean_price,
+            clean_price,
+            (expected_clean_price - clean_price).abs()
+        );
+        assert!(
+            (expected_bond_yield - bond_yield).abs() < 1.0e-10,
+            "expected bond yield: {}, actual bond yield: {}, diff: {}",
+            expected_bond_yield,
+            bond_yield,
+            (expected_bond_yield - bond_yield).abs()
+        );
+    }
+
+    fn zcb_clean_price(discount_yield: Real, maturity_date: Date, settlement_date: Date) -> Real {
         let days = maturity_date - settlement_date;
         let interest = 100.0 * discount_yield * days as f64 / 360.0;
-        let clean_price = 100.0 - interest;
-        println!("clean_price: {}", clean_price);
-
-        let daycounter = DayCounter::actual_actual_old_isma();
-        let compounding = Compounding::SimpleThenCompounded;
-        let frequency = Semiannual;
-
-        let bond_yield = 100.0 * zcb.bond_yield(
-            clean_price,
-            daycounter,
-            compounding,
-            frequency,
-            settlement_date,
-            None,
-            None,
-            None,
-            None,
-        );
-
-        println!("bond yield: {}", bond_yield);
+        100.0 - interest
     }
 }
