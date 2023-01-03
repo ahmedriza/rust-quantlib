@@ -5,7 +5,6 @@ use rust_quantlib::datetime::holidays::unitedstates::UnitedStates;
 use rust_quantlib::datetime::{date::Date, months::Month::*};
 use rust_quantlib::instruments::bond::Bond;
 use rust_quantlib::instruments::zerocouponbond::ZeroCouponBond;
-use rust_quantlib::pricingengines::bond::bondfunctions;
 use rust_quantlib::rates::compounding::Compounding::*;
 
 /// This example shows how to calcualate the maturity yield on US Treasury Bills using
@@ -30,9 +29,17 @@ pub fn main() {
     for i in 0..depo_maturity_dates.len() {
         let maturity_date = depo_maturity_dates[i];
         let discount_yield = depo_discount_yields[i] / 100.0;
-        let zcb = ZeroCouponBond::new(1, &calendar, face_amount, maturity_date, None, None, None);
+        let zcb = ZeroCouponBond::new(
+            settlement_days,
+            &calendar,
+            face_amount,
+            maturity_date,
+            None,
+            None,
+            None,
+        );
 
-        let price = bondfunctions::price_from_discount_yield(&zcb, discount_yield, settlement_date);
+        let price = zcb.price_from_discount_yield(discount_yield, settlement_date);
 
         let bond_yield = 100.0
             * zcb.bond_yield(
@@ -46,15 +53,10 @@ pub fn main() {
                 None,
                 None,
             );
-        /*
-        let y = InterestRate::new(
-            discount_yield / 100.0,
-            DayCounter::usa(),
-            SimpleThenCompounded,
-            Semiannual,
+
+        println!(
+            "{:?}, price: {}, bond yield: {:.3}%",
+            zcb, price, bond_yield
         );
-        let dirty_price = bondfunctions::dirty_price(&zcb, &y, settlement_date);
-         */
-        println!("price: {}, bond yield: {}", price, bond_yield);
     }
 }

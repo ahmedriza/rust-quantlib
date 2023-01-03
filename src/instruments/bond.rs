@@ -48,7 +48,7 @@ pub trait Bond {
     /// the price calculated from the corresponding yield. If the price from a constant yield is
     /// desired, it is advisable to use the other method that takes a constant yield.
     fn dirty_price(&self, pricing_date: Date) -> Real;
-    
+
     /// Return the Bond issue date
     fn issue_date(&self) -> Date;
 

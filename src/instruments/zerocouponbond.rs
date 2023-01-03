@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{rc::Rc, fmt::Debug};
 
 use crate::{
     cashflows::{cashflow::Leg, simplecashflow::Redemption},
@@ -30,6 +30,16 @@ pub struct ZeroCouponBond {
     pub notional_schedule: Vec<Date>,
     pub cashflows: Leg,
     pub redemptions: Leg,
+}
+
+impl Debug for ZeroCouponBond {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(f, "Bond/0.0/{:.2}/{}-{:02}-{:02}", self.face_amount,
+               self.maturity_date.year(),
+               self.maturity_date.month() as Integer,               
+               self.maturity_date.day_of_month(),
+        )
+    }
 }
 
 impl ZeroCouponBond {
@@ -66,6 +76,14 @@ impl ZeroCouponBond {
             cashflows: vec![redemption_cash_flow.clone()],
             redemptions: vec![redemption_cash_flow],
         }
+    }
+
+    /// Calculate the price of a zero coupon bond (e.g. US Treasury Bill) given its discount yield
+    pub fn price_from_discount_yield(&self, discount_yield: Real, settlement_date: Date) -> Real {
+        let maturity_date = self.maturity_date();
+        let days = maturity_date - settlement_date;
+        let interest = 100.0 * discount_yield * days as Real / 360.0;
+        100.0 - interest
     }
 }
 
@@ -128,6 +146,7 @@ impl Bond for ZeroCouponBond {
         if current_notional == 0.0 {
             return 0.0;
         }
+        // TODO needs bond pricing engine implementation
         todo!()
     }
 
@@ -164,7 +183,6 @@ mod test {
         },
         instruments::bond::Bond,
         rates::compounding::Compounding,
-        types::Real,
     };
 
     use super::ZeroCouponBond;
@@ -180,7 +198,10 @@ mod test {
         let maturity_date = Date::new(5, July, 2022);
 
         let zcb = ZeroCouponBond::new(1, &calendar, face_amount, maturity_date, None, None, None);
-        let clean_price = zcb_clean_price(discount_yield, maturity_date, settlement_date);
+
+        // let clean_price = zcb_clean_price(discount_yield, maturity_date, settlement_date);
+        let clean_price = zcb.price_from_discount_yield(discount_yield, settlement_date);
+
         let bond_yield = 100.0
             * zcb.bond_yield(
                 clean_price,
@@ -211,11 +232,5 @@ mod test {
             bond_yield,
             (expected_bond_yield - bond_yield).abs()
         );
-    }
-
-    fn zcb_clean_price(discount_yield: Real, maturity_date: Date, settlement_date: Date) -> Real {
-        let days = maturity_date - settlement_date;
-        let interest = 100.0 * discount_yield * days as f64 / 360.0;
-        100.0 - interest
     }
 }

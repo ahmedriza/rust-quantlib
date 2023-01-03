@@ -97,14 +97,3 @@ pub fn is_tradeable(bond: &impl Bond, settlement_date: Date) -> bool {
     bond.notional(settlement_date) != 0.0
 }
 
-/// Calculate the price of a zero coupon bond (e.g. US Treasury Bill) given its discount yield 
-pub fn price_from_discount_yield(
-    bond: &impl Bond,
-    discount_yield: Real,
-    settlement_date: Date
-) -> Real {
-    let maturity_date = bond.maturity_date();
-    let days = maturity_date - settlement_date;
-    let interest = 100.0 * discount_yield * days as Real / 360.0;
-    100.0 - interest
-}
