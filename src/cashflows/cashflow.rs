@@ -16,6 +16,7 @@ use super::irrfinder::IrrFinder;
 pub type Leg = Vec<Rc<dyn CashFlow>>;
 
 pub trait CashFlow {
+    /// Accrued amount at the given date
     fn accurued_amount(&self, settlement_date: Date) -> Real;
 
     /// Returns the amount of the cash flow. The amount is not discounted, i.e., it is the
