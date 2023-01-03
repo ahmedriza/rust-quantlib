@@ -10,7 +10,7 @@ use crate::{
 use super::cashflow::Leg;
 
 /// Helper for building a sequence of [FixedRateCoupon] instances
-pub struct FixedRateLeg {
+pub struct FixedRateCouponBuilder {
     pub schedule: Schedule,
     pub notionals: Vec<Real>,
     pub coupon_rates: Vec<InterestRate>,
@@ -25,7 +25,7 @@ pub struct FixedRateLeg {
     pub ex_coupon_end_of_month: Option<bool>,                // false
 }
 
-impl FixedRateLeg {
+impl FixedRateCouponBuilder {
     /// Construct a [FixedRateLeg] from the mandatory parameters
     pub fn new(schedule: Schedule, notionals: Vec<Real>, coupon_rates: Vec<InterestRate>) -> Self {
         Self {
