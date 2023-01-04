@@ -44,6 +44,7 @@ impl FixedRateCoupon {
         }
     }
 
+    #[allow(clippy::too_many_arguments)]
     pub fn with_interest_rate(
         payment_date: Date,
         nominal: Real,
@@ -64,7 +65,7 @@ impl FixedRateCoupon {
             ex_coupon_date: ex_coupon_date.unwrap_or_default(),
             rate: interest_rate,
         }
-    }    
+    }
 }
 
 impl CashFlow for FixedRateCoupon {
@@ -148,11 +149,55 @@ mod test {
     use std::rc::Rc;
 
     use crate::{
-        cashflows::cashflow::Leg,
-        datetime::{date::Date, daycounter::DayCounter, months::Month::*},
+        cashflows::{
+            cashflow::{self, Leg},
+            fixedratecouponbuilder::FixedRateCouponBuilder,
+        },
+        context::pricing_context::PricingContext,
+        datetime::{
+            businessdayconvention::BusinessDayConvention, date::Date, daycounter::DayCounter,
+            frequency::Frequency, holidays::target::Target, months::Month::*, period::Period,
+            schedule::ScheduleBuilder, timeunit::TimeUnit::Months,
+        },
+        rates::{interestrate::InterestRate, compounding::Compounding},
     };
 
     use super::FixedRateCoupon;
+
+    #[test]
+    fn test_settlement_date() {
+        let today = Date::todays_date();
+        let pricing_context = pricing_context(today);
+
+        let from = today - Period::new(2, Months);
+        let to = today + Period::new(4, Months);
+        let schedule = ScheduleBuilder::new(
+            pricing_context,
+            from,
+            to,
+            Period::from(Frequency::Semiannual),
+            Target::new(),
+        )
+        .with_convention(BusinessDayConvention::Unadjusted)
+        .backwards()
+        .build();
+
+        let notionals = vec![100.0];
+        let coupon_rates = vec![InterestRate::new(
+            0.03,
+            DayCounter::actual360(),
+            Compounding::Simple,
+            Frequency::Annual,
+        )];
+        let leg = FixedRateCouponBuilder::new(schedule, notionals, coupon_rates)
+            .with_payment_calendar(Target::new())
+            .with_payment_adjustment(BusinessDayConvention::Following)
+            .build();
+
+        let accured_amount = cashflow::accurued_amount(&leg, false, pricing_context.eval_date);
+
+        println!("accured_amount: {}", accured_amount);
+    }
 
     #[test]
     fn test_fixed_rate_coupon() {
@@ -176,5 +221,9 @@ mod test {
             None,
             None,
         )));
+    }
+
+    fn pricing_context(eval_date: Date) -> PricingContext {
+        PricingContext { eval_date }
     }
 }

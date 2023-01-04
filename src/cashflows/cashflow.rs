@@ -33,6 +33,7 @@ pub trait CashFlow {
 
     /// Returns true if a cashflow has already occurred before a date.
     fn has_occurred(&self, ref_date: &Date, include_ref_date: bool) -> bool {
+        // easy and quick handling of most cases
         if ref_date != &Date::default() {
             let cf = self.date();
             if ref_date < &cf {
@@ -68,7 +69,7 @@ pub fn accurued_amount(
     settlement_date: Date,
 ) -> Real {
     let mut result = 0.0;
-    if let Some(i) = next_cashflow(leg, include_settlement_date_flows, settlement_date) {
+    if let Some(mut i) = next_cashflow(leg, include_settlement_date_flows, settlement_date) {
         let payment_date = leg[i].date();
         while i < leg.len() {
             let cf = &leg[i];
@@ -76,6 +77,7 @@ pub fn accurued_amount(
                 // TODO ensure that this call is restricted to `Coupon` cash flows only
                 result += cf.accurued_amount(settlement_date);
             }
+            i += 1;
         }
     }
     result
@@ -126,7 +128,7 @@ pub fn next_cashflow(
     settlement_date: Date,
 ) -> Option<Size> {
     for (index, cf) in leg.iter().enumerate() {
-        if cf.has_occurred(&settlement_date, include_settlement_date_flows) {
+        if !cf.has_occurred(&settlement_date, include_settlement_date_flows) {
             return Some(index);
         }
     }
