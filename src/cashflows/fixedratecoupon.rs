@@ -147,7 +147,7 @@ impl Coupon for FixedRateCoupon {
 #[cfg(test)]
 mod test {
     use crate::{
-        cashflows::{cashflow, fixedratecouponbuilder::FixedRateCouponBuilder},
+        cashflows::{cashflow, coupon::Coupon, fixedratecouponbuilder::FixedRateCouponBuilder},
         context::pricing_context::PricingContext,
         datetime::{
             businessdayconvention::BusinessDayConvention,
@@ -250,13 +250,7 @@ mod test {
             FixedRateCouponBuilder::new(schedule.clone(), notionals.clone(), coupon_rates.clone())
                 .build();
         for cf in leg {
-            let ex_coupon_date = cf.ex_coupon_date();
-            assert_eq!(
-                ex_coupon_date,
-                Date::default(),
-                "Ex-coupon date found: {:?}, none expected",
-                ex_coupon_date
-            )
+            validate_dates(cf.ex_coupon_date(), Date::default());
         }
 
         // calendar days
@@ -271,13 +265,7 @@ mod test {
                 .build();
         for cf in leg {
             let expected = cf.accrual_end_date() - 2;
-            assert_eq!(
-                cf.ex_coupon_date(),
-                expected,
-                "Ex-coupon date = {:?}, but expected: {:?}",
-                cf.ex_coupon_date(),
-                expected
-            )
+            validate_dates(cf.ex_coupon_date(), expected);
         }
 
         // business days
@@ -290,6 +278,7 @@ mod test {
                 false,
             )
             .build();
+
         for cf in leg {
             let expected = calendar.advance_by_days(
                 cf.accrual_end_date(),
@@ -298,13 +287,7 @@ mod test {
                 BusinessDayConvention::Following,
                 false,
             );
-            assert_eq!(
-                cf.ex_coupon_date(),
-                expected,
-                "Ex-coupon date = {:?}, but expected: {:?}",
-                cf.ex_coupon_date(),
-                expected
-            )
+            validate_dates(cf.ex_coupon_date(), expected);
         }
     }
 
@@ -338,13 +321,7 @@ mod test {
 
         let first_coupon = &leg[0];
         let expected = Date::new(31, August, 2016);
-        assert_eq!(
-            first_coupon.reference_period_start(),
-            expected,
-            "Expected reference start date at end of month: {:?}, got {:?}",
-            expected,
-            first_coupon.reference_period_start(),
-        );
+        validate_dates(first_coupon.reference_period_start(), expected);
     }
 
     #[test]
@@ -379,12 +356,87 @@ mod test {
         let last_coupon = &leg[leg.len() - 1];
 
         let expected = Date::new(31, August, 2018);
+        validate_dates(last_coupon.reference_period_end(), expected);
+    }
+
+    #[test]
+    fn test_longer_leg() {
+        let today = Date::new(15, September, 2017);
+        let pricing_context = pricing_context(today);
+
+        let from = today;
+        let to = Date::new(30, September, 2020);
+        let schedule = ScheduleBuilder::new(
+            pricing_context,
+            from,
+            to,
+            Period::from(Frequency::Semiannual),
+            NilHoliday::new(),
+        )
+        .with_next_to_last_date(Date::new(25, September, 2020))
+        .backwards()
+        .build();
+
+        let notionals = vec![100.0];
+        let coupon_rates = vec![InterestRate::new(
+            0.01,
+            DayCounter::actual360(),
+            Compounding::Simple,
+            Frequency::Annual,
+        )];
+        let leg = FixedRateCouponBuilder::new(schedule, notionals, coupon_rates).build();
+
         assert_eq!(
-            last_coupon.reference_period_end(),
-            expected,
-            "Expected reference end date at end of month: {:?}, got {:?}",
-            expected,
-            last_coupon.reference_period_end(),
+            leg.len(),
+            8,
+            "Expected leg length 8, but got: {}",
+            leg.len()
+        );
+
+        let expected_dates = vec![
+            Date::new(25, September, 2017),
+            Date::new(25, March, 2018),
+            Date::new(25, September, 2018),
+            Date::new(25, March, 2019),
+            Date::new(25, September, 2019),
+            Date::new(25, March, 2020),
+            Date::new(25, September, 2020),
+            Date::new(30, September, 2020),
+        ];
+        let expected_ref_starts = vec![
+            Date::new(25, March, 2017),
+            Date::new(25, September, 2017),
+            Date::new(25, March, 2018),
+            Date::new(25, September, 2018),
+            Date::new(25, March, 2019),
+            Date::new(25, September, 2019),
+            Date::new(25, March, 2020),
+            Date::new(25, September, 2020),
+        ];
+        let expected_ref_ends = vec![
+            Date::new(25, September, 2017),
+            Date::new(25, March, 2018),
+            Date::new(25, September, 2018),
+            Date::new(25, March, 2019),
+            Date::new(25, September, 2019),
+            Date::new(25, March, 2020),
+            Date::new(25, September, 2020),
+            Date::new(25, March, 2021),
+        ];
+
+        for (i, cf) in leg.iter().enumerate() {
+            //
+            validate_dates(cf.date(), expected_dates[i]);
+            validate_dates(cf.reference_period_start(), expected_ref_starts[i]);
+            validate_dates(cf.reference_period_end(), expected_ref_ends[i]);
+        }
+    }
+
+    fn validate_dates(calculated: Date, expected: Date) {
+        assert_eq!(
+            calculated, expected,
+            "Expected date: {:?}, got {:?}",
+            expected, calculated,
         );
     }
 
