@@ -13,6 +13,7 @@ pub mod imm;
 pub mod months;
 pub mod period;
 pub mod schedule;
+pub mod schedulebuilder;
 pub mod timeunit;
 pub mod weekday;
 pub mod weekend;

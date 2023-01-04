@@ -157,7 +157,7 @@ mod test {
             holidays::{nilholiday::NilHoliday, target::Target},
             months::Month::*,
             period::Period,
-            schedule::ScheduleBuilder,
+            schedulebuilder::ScheduleBuilder,
             timeunit::TimeUnit::{Days, Months, Years},
         },
         rates::{compounding::Compounding, interestrate::InterestRate},
@@ -344,6 +344,47 @@ mod test {
             "Expected reference start date at end of month: {:?}, got {:?}",
             expected,
             first_coupon.reference_period_start(),
+        );
+    }
+
+    #[test]
+    fn test_irregular_last_coupon_reference_dates_at_end_of_month() {
+        let today = Date::new(17, January, 2017);
+        let pricing_context = pricing_context(today);
+
+        let from = today;
+        let to = Date::new(15, September, 2018);
+        let schedule = ScheduleBuilder::new(
+            pricing_context,
+            from,
+            to,
+            Period::from(Frequency::Semiannual),
+            NilHoliday::new(),
+        )
+        .with_next_to_last_date(Date::new(28, February, 2018))
+        .with_convention(BusinessDayConvention::Unadjusted)
+        .with_end_of_month(true)
+        .backwards()
+        .build();
+
+        let notionals = vec![100.0];
+        let coupon_rates = vec![InterestRate::new(
+            0.01,
+            DayCounter::actual360(),
+            Compounding::Simple,
+            Frequency::Annual,
+        )];
+        let leg = FixedRateCouponBuilder::new(schedule, notionals, coupon_rates).build();
+
+        let last_coupon = &leg[leg.len() - 1];
+
+        let expected = Date::new(31, August, 2018);
+        assert_eq!(
+            last_coupon.reference_period_end(),
+            expected,
+            "Expected reference end date at end of month: {:?}, got {:?}",
+            expected,
+            last_coupon.reference_period_end(),
         );
     }
 

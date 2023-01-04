@@ -143,17 +143,6 @@ impl FixedRateCouponBuilder {
     pub fn build(self) -> CouponLeg {
         assert!(!self.coupon_rates.is_empty(), "No coupon rates give");
         assert!(!self.notionals.is_empty(), "No notinals given");
-        /*
-        assert!(
-            self.schedule.size() == self.coupon_rates.len()
-                && self.schedule.size() == self.notionals.len(),
-            "Number of schedules, coupon rates and notionals must be the same, but \
-                 got {} schedules, {} coupon rates and {} notionals",
-            self.schedule.size(),
-            self.coupon_rates.len(),
-            self.notionals.len()
-        );
-        */
 
         let payment_calendar = self
             .payment_calendar
@@ -169,24 +158,26 @@ impl FixedRateCouponBuilder {
         leg.push(Rc::new(coupon));
 
         // regular periods
+        let mut start = self.schedule[1];
         for i in 2..self.schedule.size() - 1 {
             let coupon = self.make_regular_period_coupon(
+                start,
+                i,
                 payment_calendar,
                 payment_lag,
                 payment_adjustment,
-                self.schedule[1],
-                i,
             );
             leg.push(Rc::new(coupon));
+            start = self.schedule[i];
         }
 
         if self.schedule.size() > 2 {
             // last period might be short or long
             let coupon = self.make_last_period_coupon(
+                self.schedule[self.schedule.size() - 2],
                 payment_calendar,
                 payment_lag,
                 payment_adjustment,
-                self.schedule[self.schedule.size() - 2],
             );
             leg.push(Rc::new(coupon));
         }
@@ -241,11 +232,11 @@ impl FixedRateCouponBuilder {
 
     fn make_regular_period_coupon(
         &self,
+        start: Date,
+        i: Size,
         payment_calendar: &Calendar,
         payment_lag: Integer,
         payment_adjustment: BusinessDayConvention,
-        start: Date,
-        i: Size,
     ) -> FixedRateCoupon {
         let end = self.schedule[i];
         let payment_date =
@@ -276,13 +267,14 @@ impl FixedRateCouponBuilder {
 
     fn make_last_period_coupon(
         &self,
+        start: Date,
         payment_calendar: &Calendar,
         payment_lag: Integer,
         payment_adjustment: BusinessDayConvention,
-        start: Date,
     ) -> FixedRateCoupon {
         let n = self.schedule.size();
         let end = self.schedule[n - 1];
+
         let payment_date =
             payment_calendar.advance_by_days(end, payment_lag, Days, payment_adjustment, false);
         let ex_coupon_date = self.make_ex_coupon_date(payment_date);
@@ -332,8 +324,8 @@ impl FixedRateCouponBuilder {
                 r,
                 start,
                 end,
+                Some(start),
                 Some(ref_date),
-                Some(end),
                 Some(ex_coupon_date),
             )
         }

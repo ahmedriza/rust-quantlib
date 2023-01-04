@@ -11,7 +11,7 @@ use super::cashflow::CashFlow;
 pub type CouponLeg = Vec<Rc<dyn Coupon>>;
 
 /// Coupon accruing over a fixed period
-pub trait Coupon: CashFlow {   
+pub trait Coupon: CashFlow {
     /// Accrual period in days
     fn accrual_days(&self) -> SerialNumber {
         self.day_counter()
@@ -27,7 +27,7 @@ pub trait Coupon: CashFlow {
             &self.reference_period_end(),
         )
     }
-    
+
     /// Accrued days at the given date
     fn accrued_days(&self, date: Date) -> SerialNumber {
         if date <= self.accrual_start_date() || date > self.date() {
@@ -83,8 +83,11 @@ pub trait Coupon: CashFlow {
     fn reference_period_end(&self) -> Date;
 }
 
-impl <T> Coupon for Rc<T>
-where T: Coupon + ?Sized
+impl<T> Coupon for Rc<T>
+where
+    // Note that `?Sized` is needed here as otherwise the compiler will default to `Sized`
+    // which will then forbid a type such as `Rc<dyn Coupon>`
+    T: Coupon + ?Sized,
 {
     fn day_counter(&self) -> &DayCounter {
         (**self).day_counter()

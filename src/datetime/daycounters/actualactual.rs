@@ -477,7 +477,7 @@ mod test {
         datetime::{
             businessdayconvention::BusinessDayConvention::Unadjusted, date::Date,
             daycounter::DayCounter, frequency::Frequency, holidays::target::Target,
-            months::Month::*, period::Period, schedule::ScheduleBuilder,
+            months::Month::*, period::Period, schedulebuilder::ScheduleBuilder,
         },
         types::Real,
     };

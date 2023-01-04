@@ -2,14 +2,9 @@ use std::collections::HashMap;
 
 use rust_quantlib::context::pricing_context::PricingContext;
 use rust_quantlib::datetime::{
-    businessdayconvention::BusinessDayConvention,
-    date::Date,
-    dategenerationrule::DateGenerationRule,
-    holidays::weekendsonly::WeekendsOnly,
-    months::Month::*,
-    months::*,
-    period::Period,
-    schedule::{Schedule, ScheduleBuilder},
+    businessdayconvention::BusinessDayConvention, date::Date,
+    dategenerationrule::DateGenerationRule, holidays::weekendsonly::WeekendsOnly, months::Month::*,
+    months::*, period::Period, schedule::Schedule, schedulebuilder::ScheduleBuilder,
     timeunit::TimeUnit::*,
 };
 use rust_quantlib::instruments::creditdefaultswap::cds_maturity;
