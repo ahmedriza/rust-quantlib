@@ -41,6 +41,36 @@ impl Debug for ZeroCouponBond {
     }
 }
 
+impl Bond for ZeroCouponBond {
+    fn calendar(&self) -> &Calendar {
+        &self.calendar
+    }
+
+    fn cashflows(&self) -> &Leg {
+        &self.cashflows
+    }
+
+    fn issue_date(&self) -> Date {
+        self.issue_date
+    }
+
+    fn maturity_date(&self) -> Date {
+        self.maturity_date
+    }
+
+    fn notional_schedule(&self) -> &Vec<Date> {
+        &self.notional_schedule
+    }
+
+    fn notionals(&self) -> &Vec<Real> {
+        &self.notionals
+    }
+
+    fn settlement_days(&self) -> Integer {
+        self.settlement_days
+    }
+}
+
 impl ZeroCouponBond {
     pub fn new(
         settlement_days: Integer,
@@ -83,36 +113,6 @@ impl ZeroCouponBond {
         let days = maturity_date - settlement_date;
         let interest = 100.0 * discount_yield * days as Real / 360.0;
         100.0 - interest
-    }
-}
-
-impl Bond for ZeroCouponBond {
-    fn calendar(&self) -> &Calendar {
-        &self.calendar
-    }
-
-    fn cashflows(&self) -> &Leg {
-        &self.cashflows
-    }
-
-    fn issue_date(&self) -> Date {
-        self.issue_date
-    }
-
-    fn maturity_date(&self) -> Date {
-        self.maturity_date
-    }
-
-    fn notional_schedule(&self) -> &Vec<Date> {
-        &self.notional_schedule
-    }
-
-    fn notionals(&self) -> &Vec<Real> {
-        &self.notionals
-    }
-
-    fn settlement_days(&self) -> Integer {
-        self.settlement_days
     }
 }
 

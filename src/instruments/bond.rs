@@ -17,6 +17,7 @@ pub enum BondPriceType {
 }
 
 pub trait Bond {
+    /// Accrued amount at a given date
     fn accrued_amount(&self, settlement_date: Date) -> Real {
         if !self.is_tradeable(settlement_date) {
             return 0.0;
