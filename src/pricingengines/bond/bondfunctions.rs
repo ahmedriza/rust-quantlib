@@ -23,7 +23,6 @@ pub fn bond_yield(
     guess: Real,
 ) -> Rate {
     let solver = NewtonSafe::with_max_evaluations(max_evaluations);
-
     cashflow::bond_yield(
         &solver,
         cashflows,
