@@ -43,6 +43,28 @@ impl FixedRateCoupon {
             rate: interest_rate,
         }
     }
+
+    pub fn with_interest_rate(
+        payment_date: Date,
+        nominal: Real,
+        interest_rate: InterestRate,
+        accrual_start_date: Date,
+        accrual_end_date: Date,
+        ref_period_start: Option<Date>,
+        ref_period_end: Option<Date>,
+        ex_coupon_date: Option<Date>,
+    ) -> Self {
+        Self {
+            payment_date,
+            nominal,
+            accrual_start_date,
+            accrual_end_date,
+            ref_period_start: ref_period_start.unwrap_or_default(),
+            ref_period_end: ref_period_end.unwrap_or_default(),
+            ex_coupon_date: ex_coupon_date.unwrap_or_default(),
+            rate: interest_rate,
+        }
+    }    
 }
 
 impl CashFlow for FixedRateCoupon {

@@ -10,7 +10,7 @@ use super::compounding::Compounding;
 ///
 /// It manages day-counting conventions, compounding conventions, conversion between different
 /// conventions, discount/compound factor calculations, and implied/equivalent rate calculations.
-#[derive(Debug)]
+#[derive(Debug, Clone)]
 pub struct InterestRate {
     pub rate: Rate,
     pub daycounter: DayCounter,
