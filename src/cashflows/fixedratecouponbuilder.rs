@@ -15,7 +15,7 @@ use crate::{
     types::{Integer, Rate, Real, Size},
 };
 
-use super::{cashflow::Leg, fixedratecoupon::FixedRateCoupon};
+use super::{coupon::CouponLeg, fixedratecoupon::FixedRateCoupon};
 
 /// Helper for building a sequence of [FixedRateCoupon] instances
 pub struct FixedRateCouponBuilder {
@@ -140,7 +140,7 @@ impl FixedRateCouponBuilder {
     }
 
     /// Build [Leg] of fixed rate coupons
-    pub fn build(self) -> Leg {
+    pub fn build(self) -> CouponLeg {
         assert!(!self.coupon_rates.is_empty(), "No coupon rates give");
         assert!(!self.notionals.is_empty(), "No notinals given");
         /*
@@ -162,7 +162,7 @@ impl FixedRateCouponBuilder {
         let payment_adjustment = self.payment_adjustment.unwrap_or(Following);
         let payment_lag = self.payment_lag.unwrap_or(0);
 
-        let mut leg = Leg::new();
+        let mut leg = CouponLeg::new();
         // first period might be short or long
         let coupon =
             self.make_first_period_coupon(payment_calendar, payment_lag, payment_adjustment);

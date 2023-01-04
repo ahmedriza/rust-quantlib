@@ -1,18 +1,22 @@
 use crate::{
-    cashflows::cashflow::{self, Leg},
+    cashflows::cashflow::{self, CashFlow, CashFlowLeg},
     datetime::{date::Date, daycounter::DayCounter, frequency::Frequency},
     maths::solvers1d::newtonsafe::NewtonSafe,
     rates::{compounding::Compounding, interestrate::InterestRate},
     types::{Rate, Real, Size},
 };
 
-pub fn accrued_amount(cashflows: &Leg, notional: Real, settlement_date: Date) -> Real {
+pub fn accrued_amount<T: CashFlow>(
+    cashflows: &Vec<T>,
+    notional: Real,
+    settlement_date: Date,
+) -> Real {
     cashflow::accurued_amount(cashflows, false, settlement_date) * 100.0 / notional
 }
 
 #[allow(clippy::too_many_arguments)]
 pub fn bond_yield(
-    cashflows: &Leg,
+    cashflows: &CashFlowLeg,
     price: Real,
     daycounter: DayCounter,
     compounding: Compounding,
@@ -41,7 +45,7 @@ pub fn bond_yield(
 /// Dirty price of a bond given a yield `y` and settlement date.
 pub fn dirty_price(
     notional: Real,
-    cashflows: &Leg,
+    cashflows: &CashFlowLeg,
     y: &InterestRate,
     settlement_date: Date,
 ) -> Real {

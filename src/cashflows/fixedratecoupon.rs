@@ -69,7 +69,7 @@ impl FixedRateCoupon {
 }
 
 impl CashFlow for FixedRateCoupon {
-    fn accurued_amount(&self, date: Date) -> Real {
+    fn accrued_amount(&self, date: Date) -> Real {
         if date <= self.accrual_start_date || date > self.payment_date {
             // out of coupon range
             0.0
@@ -150,7 +150,7 @@ mod test {
 
     use crate::{
         cashflows::{
-            cashflow::{self, Leg},
+            cashflow::{self, CashFlowLeg},
             fixedratecouponbuilder::FixedRateCouponBuilder,
         },
         context::pricing_context::PricingContext,
@@ -159,7 +159,7 @@ mod test {
             frequency::Frequency, holidays::target::Target, months::Month::*, period::Period,
             schedule::ScheduleBuilder, timeunit::TimeUnit::Months,
         },
-        rates::{interestrate::InterestRate, compounding::Compounding},
+        rates::{compounding::Compounding, interestrate::InterestRate},
     };
 
     use super::FixedRateCoupon;
@@ -195,13 +195,15 @@ mod test {
             .build();
 
         let accured_amount = cashflow::accurued_amount(&leg, false, pricing_context.eval_date);
-
         println!("accured_amount: {}", accured_amount);
+
+        let accrued_period = cashflow::accrued_period(&leg, false, pricing_context.eval_date);
+        println!("accrued_period: {}", accrued_period);
     }
 
     #[test]
     fn test_fixed_rate_coupon() {
-        let mut leg: Leg = Leg::new();
+        let mut leg: CashFlowLeg = CashFlowLeg::new();
         let payment_date = Date::new(3, January, 2023);
         let nominal = 100.0;
         let rate = 0.01;

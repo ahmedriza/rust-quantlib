@@ -1,5 +1,6 @@
 use std::rc::Rc;
 
+use crate::datetime::SerialNumber;
 use crate::datetime::date::Date;
 use crate::datetime::daycounter::DayCounter;
 use crate::datetime::frequency::Frequency;
@@ -10,15 +11,16 @@ use crate::rates::compounding::Compounding;
 use crate::rates::interestrate::InterestRate;
 use crate::types::{Rate, Real, Size, Time};
 
+use super::coupon::{Coupon, CouponLeg};
 use super::irrfinder::IrrFinder;
 
 /// Sequence of cashflows
-pub type Leg = Vec<Rc<dyn CashFlow>>;
+pub type CashFlowLeg = Vec<Rc<dyn CashFlow>>;
 
 pub trait CashFlow {
     /// Accrued amount at the given date
-    fn accurued_amount(&self, settlement_date: Date) -> Real;
-
+    fn accrued_amount(&self, date: Date) -> Real;
+    
     /// Returns the amount of the cash flow. The amount is not discounted, i.e., it is the
     /// actual amount paid at the cash flow date.
     fn amount(&self) -> Real;
@@ -61,26 +63,80 @@ pub trait CashFlow {
     }
 }
 
+impl<T> CashFlow for Rc<T>
+where
+    // Note that `?Sized` is needed here as otherwise the compiler will default to `Sized`
+    // which will then forbid a type such as `Rc<dyn CashFlow>`
+    T: CashFlow + ?Sized,
+{
+    fn accrued_amount(&self, settlement_date: Date) -> Real {
+        (**self).accrued_amount(settlement_date)
+    }    
+    
+    fn amount(&self) -> Real {
+        (**self).amount()
+    }
+
+    fn date(&self) -> Date {
+        (**self).date()
+    }
+}
+
 // -------------------------------------------------------------------------------------------------
 
-pub fn accurued_amount(
-    leg: &Leg,
+pub fn accurued_amount<T: CashFlow>(
+    leg: &Vec<T>,
     include_settlement_date_flows: bool,
     settlement_date: Date,
 ) -> Real {
     let mut result = 0.0;
-    if let Some(mut i) = next_cashflow(leg, include_settlement_date_flows, settlement_date) {
+    if let Some(mut i) = __next_cashflow(leg, include_settlement_date_flows, settlement_date) {
         let payment_date = leg[i].date();
         while i < leg.len() {
             let cf = &leg[i];
             if cf.date() == payment_date {
-                // TODO ensure that this call is restricted to `Coupon` cash flows only
-                result += cf.accurued_amount(settlement_date);
+                result += cf.accrued_amount(settlement_date);
             }
             i += 1;
         }
     }
     result
+}
+
+pub fn accurued_days<T: Coupon>(
+    leg: &Vec<T>,
+    include_settlement_date_flows: bool,
+    settlement_date: Date,
+) -> SerialNumber {
+    if let Some(mut i) = __next_cashflow(leg, include_settlement_date_flows, settlement_date) {
+        let payment_date = leg[i].date();
+        while i < leg.len() {
+            let cf = &leg[i];
+            if cf.date() == payment_date {
+                return cf.accrued_days(settlement_date);
+            }
+            i += 1;
+        }
+    }
+    0
+}
+
+pub fn accrued_period(
+    leg: &CouponLeg,
+    include_settlement_date_flows: bool,
+    settlement_date: Date,
+) -> Time {
+    if let Some(mut i) = next_cashflow(leg, include_settlement_date_flows, settlement_date) {
+        let payment_date = leg[i].date();
+        while i < leg.len() {
+            let cf = &leg[i];
+            if cf.date() == payment_date {
+                return cf.accrued_period(settlement_date);
+            }
+            i += 1;
+        }
+    }
+    0.0
 }
 
 /// Implied internal rate of return.
@@ -89,7 +145,7 @@ pub fn accurued_amount(
 #[allow(clippy::too_many_arguments)]
 pub fn bond_yield(
     solver: &impl Solver1D,
-    cashflows: &Leg,
+    cashflows: &CashFlowLeg,
     npv: Real,
     daycounter: DayCounter,
     compounding: Compounding,
@@ -120,10 +176,23 @@ pub fn bond_yield(
     )
 }
 
+pub fn __next_cashflow<T: CashFlow>(
+    leg: &Vec<T>,
+    include_settlement_date_flows: bool,
+    settlement_date: Date,
+) -> Option<Size> {
+    for (index, cf) in leg.iter().enumerate() {
+        if !cf.has_occurred(&settlement_date, include_settlement_date_flows) {
+            return Some(index);
+        }
+    }
+    None
+}
+
 /// Return `Some(index)` where `index` is index of first cash flow in the [Leg] if there are
 /// cash flows.  Otherwise return `None`.
 pub fn next_cashflow(
-    leg: &Leg,
+    leg: &CouponLeg,
     include_settlement_date_flows: bool,
     settlement_date: Date,
 ) -> Option<Size> {
@@ -138,7 +207,7 @@ pub fn next_cashflow(
 /// NPV of the cash flows.
 /// The NPV is the sum of the cash flows, each discounted according to the given term structure.
 pub fn npv(
-    cashflows: &Leg,
+    cashflows: &CashFlowLeg,
     interestrate: &InterestRate,
     include_settlement_date_flows: bool,
     settlement_date: Date,
@@ -203,7 +272,7 @@ pub fn get_stepwise_discount_time(
 ///
 /// where `P` is the present value of the cash flows according to the given IRR `y`.
 pub fn modified_duration(
-    cashflows: &Leg,
+    cashflows: &CashFlowLeg,
     y: &InterestRate,
     include_settlement_date_flows: bool,
     settlement_date: Date,

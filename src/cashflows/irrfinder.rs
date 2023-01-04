@@ -4,12 +4,12 @@ use crate::{
     types::{Rate, Real},
 };
 
-use super::cashflow::{self, Leg};
+use super::cashflow::{self, CashFlowLeg};
 
 /// Provides functions to help in the calculation of the internal rate of return of bond
 /// cash flows. 
 pub struct IrrFinder<'a> {
-    pub cashflows: &'a Leg,
+    pub cashflows: &'a CashFlowLeg,
     pub npv: Real,
     pub daycounter: DayCounter,
     pub compounding: Compounding,
@@ -22,7 +22,7 @@ pub struct IrrFinder<'a> {
 impl<'a> IrrFinder<'a> {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
-        cashflows: &'a Leg,
+        cashflows: &'a CashFlowLeg,
         npv: Real,
         daycounter: DayCounter,
         compounding: Compounding,

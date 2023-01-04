@@ -1,5 +1,5 @@
 use crate::{
-    cashflows::cashflow::Leg,
+    cashflows::cashflow::CashFlowLeg,
     datetime::{
         calendar::Calendar, date::Date, daycounter::DayCounter, frequency::Frequency,
         timeunit::TimeUnit::Days,
@@ -82,7 +82,7 @@ pub trait Bond {
     fn calendar(&self) -> &Calendar;
 
     /// Return the cashflows
-    fn cashflows(&self) -> &Leg;
+    fn cashflows(&self) -> &CashFlowLeg;
 
     /// Theoretical clean price.
     ///

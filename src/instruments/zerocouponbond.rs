@@ -1,7 +1,7 @@
 use std::{fmt::Debug, rc::Rc};
 
 use crate::{
-    cashflows::{cashflow::Leg, simplecashflow::Redemption},
+    cashflows::{cashflow::CashFlowLeg, simplecashflow::Redemption},
     datetime::{
         businessdayconvention::BusinessDayConvention::{self, *},
         calendar::Calendar,
@@ -24,8 +24,8 @@ pub struct ZeroCouponBond {
 
     pub notionals: Vec<Real>,
     pub notional_schedule: Vec<Date>,
-    pub cashflows: Leg,
-    pub redemptions: Leg,
+    pub cashflows: CashFlowLeg,
+    pub redemptions: CashFlowLeg,
 }
 
 impl Debug for ZeroCouponBond {
@@ -38,36 +38,6 @@ impl Debug for ZeroCouponBond {
             self.maturity_date.month() as Integer,
             self.maturity_date.day_of_month(),
         )
-    }
-}
-
-impl Bond for ZeroCouponBond {
-    fn calendar(&self) -> &Calendar {
-        &self.calendar
-    }
-
-    fn cashflows(&self) -> &Leg {
-        &self.cashflows
-    }
-
-    fn issue_date(&self) -> Date {
-        self.issue_date
-    }
-
-    fn maturity_date(&self) -> Date {
-        self.maturity_date
-    }
-
-    fn notional_schedule(&self) -> &Vec<Date> {
-        &self.notional_schedule
-    }
-
-    fn notionals(&self) -> &Vec<Real> {
-        &self.notionals
-    }
-
-    fn settlement_days(&self) -> Integer {
-        self.settlement_days
     }
 }
 
@@ -113,6 +83,36 @@ impl ZeroCouponBond {
         let days = maturity_date - settlement_date;
         let interest = 100.0 * discount_yield * days as Real / 360.0;
         100.0 - interest
+    }
+}
+
+impl Bond for ZeroCouponBond {
+    fn calendar(&self) -> &Calendar {
+        &self.calendar
+    }
+    
+    fn cashflows(&self) -> &CashFlowLeg {
+        &self.cashflows
+    }
+
+    fn issue_date(&self) -> Date {
+        self.issue_date
+    }
+
+    fn maturity_date(&self) -> Date {
+        self.maturity_date
+    }
+
+    fn notional_schedule(&self) -> &Vec<Date> {
+        &self.notional_schedule
+    }
+
+    fn notionals(&self) -> &Vec<Real> {
+        &self.notionals
+    }
+
+    fn settlement_days(&self) -> Integer {
+        self.settlement_days
     }
 }
 

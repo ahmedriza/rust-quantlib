@@ -1,3 +1,5 @@
+use std::rc::Rc;
+
 use crate::{
     datetime::{date::Date, daycounter::DayCounter, SerialNumber},
     types::{Rate, Real, Time},
@@ -5,8 +7,11 @@ use crate::{
 
 use super::cashflow::CashFlow;
 
+/// Sequence of coupons
+pub type CouponLeg = Vec<Rc<dyn Coupon>>;
+
 /// Coupon accruing over a fixed period
-pub trait Coupon: CashFlow {
+pub trait Coupon: CashFlow {   
     /// Accrual period in days
     fn accrual_days(&self) -> SerialNumber {
         self.day_counter()
@@ -22,7 +27,7 @@ pub trait Coupon: CashFlow {
             &self.reference_period_end(),
         )
     }
-
+    
     /// Accrued days at the given date
     fn accrued_days(&self, date: Date) -> SerialNumber {
         if date <= self.accrual_start_date() || date > self.date() {
@@ -76,4 +81,36 @@ pub trait Coupon: CashFlow {
 
     /// End date of the reference period
     fn reference_period_end(&self) -> Date;
+}
+
+impl <T> Coupon for Rc<T>
+where T: Coupon + ?Sized
+{
+    fn day_counter(&self) -> &DayCounter {
+        (**self).day_counter()
+    }
+
+    fn nominal(&self) -> Real {
+        (**self).nominal()
+    }
+
+    fn accrual_start_date(&self) -> Date {
+        (**self).accrual_start_date()
+    }
+
+    fn accrual_end_date(&self) -> Date {
+        (**self).accrual_end_date()
+    }
+
+    fn rate(&self) -> Rate {
+        (**self).rate()
+    }
+
+    fn reference_period_start(&self) -> Date {
+        (**self).reference_period_start()
+    }
+
+    fn reference_period_end(&self) -> Date {
+        (**self).reference_period_end()
+    }
 }
