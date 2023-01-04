@@ -1,4 +1,4 @@
-use std::{rc::Rc, fmt::Debug};
+use std::{fmt::Debug, rc::Rc};
 
 use crate::{
     cashflows::{cashflow::Leg, simplecashflow::Redemption},
@@ -6,15 +6,12 @@ use crate::{
         businessdayconvention::BusinessDayConvention::{self, *},
         calendar::Calendar,
         date::Date,
-        daycounter::DayCounter,
-        frequency::Frequency,
     },
     pricingengines::bond::bondfunctions,
-    rates::compounding::Compounding,
-    types::{Integer, Rate, Real, Size},
+    types::{Integer, Real},
 };
 
-use super::bond::{Bond, BondPriceType};
+use super::bond::Bond;
 
 /// Zero coupon bond
 pub struct ZeroCouponBond {
@@ -34,10 +31,13 @@ pub struct ZeroCouponBond {
 
 impl Debug for ZeroCouponBond {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
-        write!(f, "Bond/0.0/{:.2}/{}-{:02}-{:02}", self.face_amount,
-               self.maturity_date.year(),
-               self.maturity_date.month() as Integer,               
-               self.maturity_date.day_of_month(),
+        write!(
+            f,
+            "Bond/0.0/{:.2}/{}-{:02}-{:02}",
+            self.face_amount,
+            self.maturity_date.year(),
+            self.maturity_date.month() as Integer,
+            self.maturity_date.day_of_month(),
         )
     }
 }
@@ -89,47 +89,14 @@ impl ZeroCouponBond {
 
 impl Bond for ZeroCouponBond {
     fn accrued_amount(&self, settlement_date: Date) -> Real {
+        if !self.is_tradeable(settlement_date) {
+            return 0.0;
+        }
         let current_notional = self.notional(settlement_date);
         if current_notional == 0.0 {
             return 0.0;
         }
         bondfunctions::accrued_amount(self, settlement_date)
-    }
-
-    fn bond_yield(
-        &self,
-        clean_price: Real,
-        daycounter: DayCounter,
-        compounding: Compounding,
-        frequency: Frequency,
-        settlement_date: Date,
-        accuracy: Option<Real>,
-        max_evaluations: Option<Size>,
-        guess: Option<Real>,
-        price_type: Option<BondPriceType>,
-    ) -> Rate {
-        let accuracy = accuracy.unwrap_or(1.0e-8);
-        let max_evaluations = max_evaluations.unwrap_or(100);
-        let guess = guess.unwrap_or(0.05);
-        let price_type = price_type.unwrap_or(BondPriceType::Clean);
-
-        let current_notional = self.notional(settlement_date);
-        if current_notional == 0.0 {
-            return 0.0;
-        }
-
-        bondfunctions::bond_yield(
-            self,
-            clean_price,
-            daycounter,
-            compounding,
-            frequency,
-            settlement_date,
-            accuracy,
-            max_evaluations,
-            guess,
-            price_type,
-        )
     }
 
     fn calendar(&self) -> &Calendar {
@@ -138,16 +105,6 @@ impl Bond for ZeroCouponBond {
 
     fn cashflows(&self) -> &Leg {
         &self.cashflows
-    }
-
-    fn dirty_price(&self, pricing_date: Date) -> Real {
-        let settlement_date = self.settlement_date(pricing_date);
-        let current_notional = self.notional(settlement_date);
-        if current_notional == 0.0 {
-            return 0.0;
-        }
-        // TODO needs bond pricing engine implementation
-        todo!()
     }
 
     fn issue_date(&self) -> Date {

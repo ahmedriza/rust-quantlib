@@ -18,6 +18,7 @@ pub struct FixedRateBond {
 }
 
 impl FixedRateBond {
+    #[allow(unused)]
     #[allow(clippy::too_many_arguments)]
     pub fn new(
         settlement_days: Integer,

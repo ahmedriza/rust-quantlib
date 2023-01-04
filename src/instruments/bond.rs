@@ -5,7 +5,8 @@ use crate::{
         timeunit::TimeUnit::Days,
     },
     maths::bounds::lower_bound,
-    rates::compounding::Compounding,
+    pricingengines::bond::bondfunctions,
+    rates::{compounding::Compounding, interestrate::InterestRate},
     types::{Integer, Rate, Real, Size},
 };
 
@@ -20,8 +21,6 @@ pub trait Bond {
 
     #[allow(clippy::too_many_arguments)]
     /// Calculate the yield given a (clean) price and settlement date.
-    ///
-    /// The settlement date can default to the evaluation date.
     fn bond_yield(
         &self,
         clean_price: Real,
@@ -33,7 +32,43 @@ pub trait Bond {
         max_evaluations: Option<Size>,
         guess: Option<Real>,
         price_type: Option<BondPriceType>,
-    ) -> Rate;
+    ) -> Rate {
+        assert!(
+            self.is_tradeable(settlement_date),
+            "Non tradeable at {:?}, (maturity being {:?})",
+            settlement_date,
+            self.maturity_date()
+        );
+
+        let accuracy = accuracy.unwrap_or(1.0e-8);
+        let max_evaluations = max_evaluations.unwrap_or(100);
+        let guess = guess.unwrap_or(0.05);
+        let price_type = price_type.unwrap_or(BondPriceType::Clean);
+
+        let current_notional = self.notional(settlement_date);
+        if current_notional == 0.0 {
+            return 0.0;
+        }
+
+        let mut dirty_price = clean_price;
+        if price_type == BondPriceType::Clean {
+            dirty_price += self.accrued_amount(settlement_date);
+        }
+        let notional = self.notional(settlement_date);
+        dirty_price /= 100.0 / notional;
+
+        bondfunctions::bond_yield(
+            self.cashflows(),
+            dirty_price,
+            daycounter,
+            compounding,
+            frequency,
+            settlement_date,
+            accuracy,
+            max_evaluations,
+            guess,
+        )
+    }
 
     /// Return the [Calendar] associated with this Bond
     fn calendar(&self) -> &Calendar;
@@ -41,13 +76,69 @@ pub trait Bond {
     /// Return the cashflows
     fn cashflows(&self) -> &Leg;
 
-    /// theoretical dirty price
-    /// The default bond settlement is used for calculation.
+    /// Theoretical clean price.
     ///
     /// The theoretical price calculated from a flat term structure might differ slightly from
-    /// the price calculated from the corresponding yield. If the price from a constant yield is
-    /// desired, it is advisable to use the other method that takes a constant yield.
-    fn dirty_price(&self, pricing_date: Date) -> Real;
+    /// the price calculated from the corresponding yield.
+    fn clean_price(&self, pricing_date: Date, settlement_date: Date) -> Real {
+        self.dirty_price(pricing_date, settlement_date) - self.accrued_amount(settlement_date)
+    }
+
+    /// Theoretical dirty price
+    ///
+    /// The theoretical price calculated from a flat term structure might differ slightly from
+    /// the price calculated from the corresponding yield.
+    fn dirty_price(&self, pricing_date: Date, _settlement_date: Date) -> Real {
+        let settlement_date = self.settlement_date(pricing_date);
+        let current_notional = self.notional(settlement_date);
+        if current_notional == 0.0 {
+            return 0.0;
+        }
+        // TODO needs bond pricing engine implementation
+        todo!()
+    }
+
+    /// Clean price given a yield and settlement date
+    fn clean_price_from_yield(
+        &self,
+        y: Rate,
+        daycounter: DayCounter,
+        compounding: Compounding,
+        frequency: Frequency,
+        settlement_date: Date,
+    ) -> Real {
+        self.dirty_price_from_yield(y, daycounter, compounding, frequency, settlement_date)
+            - self.accrued_amount(settlement_date)
+    }
+
+    /// Dirty price given a yield and settlement date
+    fn dirty_price_from_yield(
+        &self,
+        y: Rate,
+        daycounter: DayCounter,
+        compounding: Compounding,
+        frequency: Frequency,
+        settlement_date: Date,
+    ) -> Real {
+        assert!(
+            self.is_tradeable(settlement_date),
+            "Non tradeable at {:?}, (maturity being {:?})",
+            settlement_date,
+            self.maturity_date()
+        );
+        let y = InterestRate::new(y, daycounter, compounding, frequency);
+        bondfunctions::dirty_price(
+            self.notional(settlement_date),
+            self.cashflows(),
+            &y,
+            settlement_date,
+        )
+    }
+
+    /// Returns whether this Bond still tradeable or not
+    fn is_tradeable(&self, settlement_date: Date) -> bool {
+        self.notional(settlement_date) != 0.0
+    }
 
     /// Return the Bond issue date
     fn issue_date(&self) -> Date;

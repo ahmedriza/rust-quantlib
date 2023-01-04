@@ -1,4 +1,4 @@
-use crate::types::Real;
+use crate::types::{Real, Size};
 
 use super::solver1d::{private, Solver1D};
 
@@ -9,6 +9,7 @@ pub struct NewtonSafe {
     upper_bound: Real,
     lower_bound_enforced: bool,
     upper_bound_enforced: bool,
+    max_evaluations: Size,
 }
 
 impl NewtonSafe {
@@ -18,12 +19,21 @@ impl NewtonSafe {
         upper_bound: Real,
         lower_bound_enforced: bool,
         upper_bound_enforced: bool,
+        max_evaluations: Size,
     ) -> impl Solver1D {
         Self {
             lower_bound,
             upper_bound,
             lower_bound_enforced,
             upper_bound_enforced,
+            max_evaluations,
+        }
+    }
+
+    pub fn with_max_evaluations(max_evaluations: Size) -> impl Solver1D {
+        Self {
+            max_evaluations,
+            ..Default::default()
         }
     }
 }
@@ -109,6 +119,10 @@ impl private::SolverDetail for NewtonSafe {
         );
     }
 
+    fn max_evaluations(&self) -> Size {
+        self.max_evaluations
+    }
+
     fn lower_bound(&self) -> Real {
         self.lower_bound
     }
@@ -136,7 +150,7 @@ mod test {
 
     #[test]
     fn test_newton_safe() {
-        let solver = NewtonSafe::default();
+        let solver = NewtonSafe::with_max_evaluations(100);
         let name = "NewtonSafe";
 
         test_solver(&solver, name);
