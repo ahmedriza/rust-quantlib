@@ -150,9 +150,15 @@ mod test {
         cashflows::{cashflow, fixedratecouponbuilder::FixedRateCouponBuilder},
         context::pricing_context::PricingContext,
         datetime::{
-            businessdayconvention::BusinessDayConvention, date::Date, daycounter::DayCounter,
-            frequency::Frequency, holidays::target::Target, months::Month::January, period::Period,
-            schedule::ScheduleBuilder, timeunit::TimeUnit::Months,
+            businessdayconvention::BusinessDayConvention,
+            date::Date,
+            daycounter::DayCounter,
+            frequency::Frequency,
+            holidays::{nilholiday::NilHoliday, target::Target},
+            months::Month::*,
+            period::Period,
+            schedule::ScheduleBuilder,
+            timeunit::TimeUnit::{Days, Months, Years},
         },
         rates::{compounding::Compounding, interestrate::InterestRate},
     };
@@ -212,6 +218,132 @@ mod test {
             "Expected accrued period: {}, but got: {}",
             expected_accrued_period,
             accrued_period
+        );
+    }
+
+    #[test]
+    fn test_ex_coupon_dates() {
+        let today = Date::new(4, January, 2023);
+        let pricing_context = pricing_context(today);
+
+        let from = today;
+        let to = today + Period::new(5, Years);
+        let schedule = ScheduleBuilder::new(
+            pricing_context,
+            from,
+            to,
+            Period::from(Frequency::Monthly),
+            Target::new(),
+        )
+        .with_convention(BusinessDayConvention::Following)
+        .build();
+
+        let notionals = vec![100.0];
+        let coupon_rates = vec![InterestRate::new(
+            0.03,
+            DayCounter::actual360(),
+            Compounding::Simple,
+            Frequency::Annual,
+        )];
+        // no ex-coupon dates
+        let leg =
+            FixedRateCouponBuilder::new(schedule.clone(), notionals.clone(), coupon_rates.clone())
+                .build();
+        for cf in leg {
+            let ex_coupon_date = cf.ex_coupon_date();
+            assert_eq!(
+                ex_coupon_date,
+                Date::default(),
+                "Ex-coupon date found: {:?}, none expected",
+                ex_coupon_date
+            )
+        }
+
+        // calendar days
+        let leg =
+            FixedRateCouponBuilder::new(schedule.clone(), notionals.clone(), coupon_rates.clone())
+                .with_ex_coupon_period(
+                    Period::new(2, Days),
+                    NilHoliday::new(),
+                    BusinessDayConvention::Unadjusted,
+                    false,
+                )
+                .build();
+        for cf in leg {
+            let expected = cf.accrual_end_date() - 2;
+            assert_eq!(
+                cf.ex_coupon_date(),
+                expected,
+                "Ex-coupon date = {:?}, but expected: {:?}",
+                cf.ex_coupon_date(),
+                expected
+            )
+        }
+
+        // business days
+        let calendar = Target::new();
+        let leg = FixedRateCouponBuilder::new(schedule, notionals, coupon_rates)
+            .with_ex_coupon_period(
+                Period::new(2, Days),
+                calendar.clone(),
+                BusinessDayConvention::Preceding,
+                false,
+            )
+            .build();
+        for cf in leg {
+            let expected = calendar.advance_by_days(
+                cf.accrual_end_date(),
+                -2,
+                Days,
+                BusinessDayConvention::Following,
+                false,
+            );
+            assert_eq!(
+                cf.ex_coupon_date(),
+                expected,
+                "Ex-coupon date = {:?}, but expected: {:?}",
+                cf.ex_coupon_date(),
+                expected
+            )
+        }
+    }
+
+    #[test]
+    fn test_irregular_first_coupon_reference_dates_at_end_of_month() {
+        let today = Date::new(17, January, 2017);
+        let pricing_context = pricing_context(today);
+
+        let from = today;
+        let to = Date::new(28, February, 2018);
+        let schedule = ScheduleBuilder::new(
+            pricing_context,
+            from,
+            to,
+            Period::from(Frequency::Semiannual),
+            Target::new(),
+        )
+        .with_convention(BusinessDayConvention::Unadjusted)
+        .with_end_of_month(true)
+        .backwards()
+        .build();
+
+        let notionals = vec![100.0];
+        let coupon_rates = vec![InterestRate::new(
+            0.01,
+            DayCounter::actual360(),
+            Compounding::Simple,
+            Frequency::Annual,
+        )];
+        let leg = FixedRateCouponBuilder::new(schedule, notionals, coupon_rates).build();
+
+        let first_coupon = &leg[0];
+        let expected = Date::new(31, August, 2016);
+        assert_eq!(
+            first_coupon.reference_period_start(),
+            expected,
+            "Expected reference start date at end of month: {:?}, got {:?}",
+            expected,
+            first_coupon.reference_period_start(),
         );
     }
 
