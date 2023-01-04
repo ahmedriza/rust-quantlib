@@ -44,7 +44,6 @@ pub trait Bond {
         accuracy: Option<Real>,
         max_evaluations: Option<Size>,
         guess: Option<Real>,
-        price_type: Option<BondPriceType>,
     ) -> Rate {
         assert!(
             self.is_tradeable(settlement_date),
@@ -56,17 +55,13 @@ pub trait Bond {
         let accuracy = accuracy.unwrap_or(1.0e-8);
         let max_evaluations = max_evaluations.unwrap_or(100);
         let guess = guess.unwrap_or(0.05);
-        let price_type = price_type.unwrap_or(BondPriceType::Clean);
 
         let current_notional = self.notional(settlement_date);
         if current_notional == 0.0 {
             return 0.0;
         }
 
-        let mut dirty_price = clean_price;
-        if price_type == BondPriceType::Clean {
-            dirty_price += self.accrued_amount(settlement_date);
-        }
+        let mut dirty_price = clean_price + self.accrued_amount(settlement_date);
         let notional = self.notional(settlement_date);
         dirty_price /= 100.0 / notional;
 

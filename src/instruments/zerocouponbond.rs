@@ -157,7 +157,6 @@ mod test {
                 None,
                 None,
                 None,
-                None,
             );
 
         let expected_clean_price = 99.93381111111111;
