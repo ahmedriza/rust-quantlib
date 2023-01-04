@@ -146,27 +146,20 @@ impl Coupon for FixedRateCoupon {
 
 #[cfg(test)]
 mod test {
-    use std::rc::Rc;
-
     use crate::{
-        cashflows::{
-            cashflow::{self, CashFlowLeg},
-            fixedratecouponbuilder::FixedRateCouponBuilder,
-        },
+        cashflows::{cashflow, fixedratecouponbuilder::FixedRateCouponBuilder},
         context::pricing_context::PricingContext,
         datetime::{
             businessdayconvention::BusinessDayConvention, date::Date, daycounter::DayCounter,
-            frequency::Frequency, holidays::target::Target, months::Month::*, period::Period,
+            frequency::Frequency, holidays::target::Target, months::Month::January, period::Period,
             schedule::ScheduleBuilder, timeunit::TimeUnit::Months,
         },
         rates::{compounding::Compounding, interestrate::InterestRate},
     };
 
-    use super::FixedRateCoupon;
-
     #[test]
-    fn test_settlement_date() {
-        let today = Date::todays_date();
+    fn test_settlement_date_accruals() {
+        let today = Date::new(4, January, 2023);
         let pricing_context = pricing_context(today);
 
         let from = today - Period::new(2, Months);
@@ -194,35 +187,32 @@ mod test {
             .with_payment_adjustment(BusinessDayConvention::Following)
             .build();
 
-        let accured_amount = cashflow::accurued_amount(&leg, false, pricing_context.eval_date);
-        println!("accured_amount: {}", accured_amount);
+        let expected_accrued_amount = 0.5083333333333329;
+        let expected_accrued_days = 61;
+        let expected_accrued_period = 0.16944444444444445;
+
+        let accrued_amount = cashflow::accurued_amount(&leg, false, pricing_context.eval_date);
+        assert!(
+            (expected_accrued_amount - accrued_amount).abs() < 1.0e-10,
+            "Expected accrued amount: {}, but got: {}",
+            expected_accrued_amount,
+            accrued_amount
+        );
+
+        let accrued_days = cashflow::accurued_days(&leg, false, pricing_context.eval_date);
+        assert_eq!(
+            accrued_days, expected_accrued_days,
+            "Expected accrued days: {}, but got: {}",
+            expected_accrued_days, accrued_days
+        );
 
         let accrued_period = cashflow::accrued_period(&leg, false, pricing_context.eval_date);
-        println!("accrued_period: {}", accrued_period);
-    }
-
-    #[test]
-    fn test_fixed_rate_coupon() {
-        let mut leg: CashFlowLeg = CashFlowLeg::new();
-        let payment_date = Date::new(3, January, 2023);
-        let nominal = 100.0;
-        let rate = 0.01;
-        let daycounter = DayCounter::usa();
-
-        let accrual_start_date = payment_date + 1;
-        let accrual_end_date = payment_date + 10;
-
-        leg.push(Rc::new(FixedRateCoupon::new(
-            payment_date,
-            nominal,
-            rate,
-            daycounter,
-            accrual_start_date,
-            accrual_end_date,
-            None,
-            None,
-            None,
-        )));
+        assert!(
+            (expected_accrued_period - accrued_period).abs() < 1.0e-10,
+            "Expected accrued period: {}, but got: {}",
+            expected_accrued_period,
+            accrued_period
+        );
     }
 
     fn pricing_context(eval_date: Date) -> PricingContext {
