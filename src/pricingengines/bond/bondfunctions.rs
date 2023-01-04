@@ -1,7 +1,6 @@
 use crate::{
     cashflows::cashflow::{self, Leg},
     datetime::{date::Date, daycounter::DayCounter, frequency::Frequency},
-    instruments::bond::Bond,
     maths::solvers1d::newtonsafe::NewtonSafe,
     rates::{compounding::Compounding, interestrate::InterestRate},
     types::{Rate, Real, Size},
@@ -49,8 +48,4 @@ pub fn dirty_price(
 ) -> Real {
     let npv = cashflow::npv(cashflows, y, false, settlement_date, Date::default());
     npv * 100.0 / notional
-}
-
-pub fn is_tradeable(bond: &impl Bond, settlement_date: Date) -> bool {
-    bond.notional(settlement_date) != 0.0
 }
