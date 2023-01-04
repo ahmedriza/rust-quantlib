@@ -17,7 +17,20 @@ pub enum BondPriceType {
 }
 
 pub trait Bond {
-    fn accrued_amount(&self, settlement_date: Date) -> Real;
+    fn accrued_amount(&self, settlement_date: Date) -> Real {
+        if !self.is_tradeable(settlement_date) {
+            return 0.0;
+        }
+        let current_notional = self.notional(settlement_date);
+        if current_notional == 0.0 {
+            return 0.0;
+        }
+        bondfunctions::accrued_amount(
+            self.cashflows(),
+            self.notional(settlement_date),
+            settlement_date,
+        )
+    }
 
     #[allow(clippy::too_many_arguments)]
     /// Calculate the yield given a (clean) price and settlement date.

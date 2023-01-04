@@ -7,7 +7,6 @@ use crate::{
         calendar::Calendar,
         date::Date,
     },
-    pricingengines::bond::bondfunctions,
     types::{Integer, Real},
 };
 
@@ -88,17 +87,6 @@ impl ZeroCouponBond {
 }
 
 impl Bond for ZeroCouponBond {
-    fn accrued_amount(&self, settlement_date: Date) -> Real {
-        if !self.is_tradeable(settlement_date) {
-            return 0.0;
-        }
-        let current_notional = self.notional(settlement_date);
-        if current_notional == 0.0 {
-            return 0.0;
-        }
-        bondfunctions::accrued_amount(self, settlement_date)
-    }
-
     fn calendar(&self) -> &Calendar {
         &self.calendar
     }

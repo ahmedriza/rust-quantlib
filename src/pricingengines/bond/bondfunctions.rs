@@ -7,9 +7,8 @@ use crate::{
     types::{Rate, Real, Size},
 };
 
-pub fn accrued_amount(bond: &impl Bond, settlement_date: Date) -> Real {
-    cashflow::accurued_amount(bond.cashflows(), false, settlement_date) * 100.0
-        / bond.notional(settlement_date)
+pub fn accrued_amount(cashflows: &Leg, notional: Real, settlement_date: Date) -> Real {
+    cashflow::accurued_amount(cashflows, false, settlement_date) * 100.0 / notional
 }
 
 #[allow(clippy::too_many_arguments)]
