@@ -302,5 +302,11 @@ mod test {
             expected_bond_yield,
             (expected_bond_yield - bond_yield).abs()
         );
+        assert!(
+            (expected_bond_yield - bond_yield).abs() < 1.0e-10,
+            "Expected bond yield: {}, but got: {}",
+            expected_bond_yield,
+            bond_yield
+        );
     }
 }
