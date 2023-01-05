@@ -105,8 +105,8 @@ impl FixedRateBond {
             &[redemption.unwrap_or(100.0)], // redemption defaults to 100.0
         );
 
-        println!("notionals: {:?}", notionals);
-        println!("notional_schedule: {:#?}", notional_schedule);
+        // println!("notionals: {:?}", notionals);
+        // println!("notional_schedule: {:#?}", notional_schedule);
 
         // All cashflows including redemptions
         let mut cashflows = CashFlowLeg::new();
@@ -117,10 +117,12 @@ impl FixedRateBond {
             cashflows.push(r.clone());
         }
 
+        /*
         for cf in cashflows.iter() {
             println!("cashflow, date: {:?}, amount: {}", cf.date(), cf.amount());
         }
-
+         */
+        
         // TODO
         // stable_sort now moves the redemptions to the right places
         // while ensuring that they follow coupons with the same date.
