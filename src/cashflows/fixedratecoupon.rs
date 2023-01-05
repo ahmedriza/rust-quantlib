@@ -6,7 +6,8 @@ use crate::{
 
 use super::{cashflow::CashFlow, coupon::Coupon};
 
-/// Coupon paying a fixed interest rate
+/// Coupon paying a fixed interest rate.
+#[derive(Debug, Clone)]
 pub struct FixedRateCoupon {
     pub payment_date: Date,
     pub nominal: Real,
@@ -69,6 +70,14 @@ impl FixedRateCoupon {
 }
 
 impl CashFlow for FixedRateCoupon {
+    fn accrual_start_date(&self) -> Date {
+        self.accrual_start_date
+    }
+
+    fn accrual_end_date(&self) -> Date {
+        self.accrual_end_date
+    }
+
     fn accrued_amount(&self, date: Date) -> Real {
         if date <= self.accrual_start_date || date > self.payment_date {
             // out of coupon range
@@ -110,6 +119,14 @@ impl CashFlow for FixedRateCoupon {
     fn ex_coupon_date(&self) -> Date {
         self.ex_coupon_date
     }
+
+    fn reference_period_start(&self) -> Date {
+        self.ref_period_start
+    }
+
+    fn reference_period_end(&self) -> Date {
+        self.ref_period_end
+    }
 }
 
 impl Coupon for FixedRateCoupon {
@@ -121,24 +138,8 @@ impl Coupon for FixedRateCoupon {
         self.nominal
     }
 
-    fn accrual_start_date(&self) -> Date {
-        self.accrual_start_date
-    }
-
-    fn accrual_end_date(&self) -> Date {
-        self.accrual_end_date
-    }
-
     fn rate(&self) -> Rate {
         self.rate.rate
-    }
-
-    fn reference_period_start(&self) -> Date {
-        self.ref_period_start
-    }
-
-    fn reference_period_end(&self) -> Date {
-        self.ref_period_end
     }
 }
 
@@ -147,7 +148,7 @@ impl Coupon for FixedRateCoupon {
 #[cfg(test)]
 mod test {
     use crate::{
-        cashflows::{cashflow, coupon::Coupon, fixedratecouponbuilder::FixedRateCouponBuilder},
+        cashflows::{cashflow, fixedrateleg::FixedRateLeg},
         context::pricing_context::PricingContext,
         datetime::{
             businessdayconvention::BusinessDayConvention,
@@ -188,7 +189,7 @@ mod test {
             Compounding::Simple,
             Frequency::Annual,
         )];
-        let leg = FixedRateCouponBuilder::new(schedule, notionals, coupon_rates)
+        let leg = FixedRateLeg::new(schedule, notionals, coupon_rates)
             .with_payment_calendar(Target::new())
             .with_payment_adjustment(BusinessDayConvention::Following)
             .build();
@@ -197,7 +198,7 @@ mod test {
         let expected_accrued_days = 61;
         let expected_accrued_period = 0.16944444444444445;
 
-        let accrued_amount = cashflow::accurued_amount(&leg, false, pricing_context.eval_date);
+        let accrued_amount = cashflow::accrued_amount(&leg, false, pricing_context.eval_date);
         assert!(
             (expected_accrued_amount - accrued_amount).abs() < 1.0e-10,
             "Expected accrued amount: {}, but got: {}",
@@ -205,7 +206,7 @@ mod test {
             accrued_amount
         );
 
-        let accrued_days = cashflow::accurued_days(&leg, false, pricing_context.eval_date);
+        let accrued_days = cashflow::accrued_days(&leg, false, pricing_context.eval_date);
         assert_eq!(
             accrued_days, expected_accrued_days,
             "Expected accrued days: {}, but got: {}",
@@ -247,30 +248,28 @@ mod test {
         )];
         // no ex-coupon dates
         let leg =
-            FixedRateCouponBuilder::new(schedule.clone(), notionals.clone(), coupon_rates.clone())
-                .build();
+            FixedRateLeg::new(schedule.clone(), notionals.clone(), coupon_rates.clone()).build();
         for cf in leg {
-            validate_dates(cf.ex_coupon_date(), Date::default());
+            validate_dates(cf.ex_coupon_date, Date::default());
         }
 
         // calendar days
-        let leg =
-            FixedRateCouponBuilder::new(schedule.clone(), notionals.clone(), coupon_rates.clone())
-                .with_ex_coupon_period(
-                    Period::new(2, Days),
-                    NilHoliday::new(),
-                    BusinessDayConvention::Unadjusted,
-                    false,
-                )
-                .build();
+        let leg = FixedRateLeg::new(schedule.clone(), notionals.clone(), coupon_rates.clone())
+            .with_ex_coupon_period(
+                Period::new(2, Days),
+                NilHoliday::new(),
+                BusinessDayConvention::Unadjusted,
+                false,
+            )
+            .build();
         for cf in leg {
-            let expected = cf.accrual_end_date() - 2;
-            validate_dates(cf.ex_coupon_date(), expected);
+            let expected = cf.accrual_end_date - 2;
+            validate_dates(cf.ex_coupon_date, expected);
         }
 
         // business days
         let calendar = Target::new();
-        let leg = FixedRateCouponBuilder::new(schedule, notionals, coupon_rates)
+        let leg = FixedRateLeg::new(schedule, notionals, coupon_rates)
             .with_ex_coupon_period(
                 Period::new(2, Days),
                 calendar.clone(),
@@ -281,13 +280,13 @@ mod test {
 
         for cf in leg {
             let expected = calendar.advance_by_days(
-                cf.accrual_end_date(),
+                cf.accrual_end_date,
                 -2,
                 Days,
                 BusinessDayConvention::Following,
                 false,
             );
-            validate_dates(cf.ex_coupon_date(), expected);
+            validate_dates(cf.ex_coupon_date, expected);
         }
     }
 
@@ -317,11 +316,11 @@ mod test {
             Compounding::Simple,
             Frequency::Annual,
         )];
-        let leg = FixedRateCouponBuilder::new(schedule, notionals, coupon_rates).build();
+        let leg = FixedRateLeg::new(schedule, notionals, coupon_rates).build();
 
         let first_coupon = &leg[0];
         let expected = Date::new(31, August, 2016);
-        validate_dates(first_coupon.reference_period_start(), expected);
+        validate_dates(first_coupon.ref_period_start, expected);
     }
 
     #[test]
@@ -351,12 +350,12 @@ mod test {
             Compounding::Simple,
             Frequency::Annual,
         )];
-        let leg = FixedRateCouponBuilder::new(schedule, notionals, coupon_rates).build();
+        let leg = FixedRateLeg::new(schedule, notionals, coupon_rates).build();
 
         let last_coupon = &leg[leg.len() - 1];
 
         let expected = Date::new(31, August, 2018);
-        validate_dates(last_coupon.reference_period_end(), expected);
+        validate_dates(last_coupon.ref_period_end, expected);
     }
 
     #[test]
@@ -384,7 +383,7 @@ mod test {
             Compounding::Simple,
             Frequency::Annual,
         )];
-        let leg = FixedRateCouponBuilder::new(schedule, notionals, coupon_rates).build();
+        let leg = FixedRateLeg::new(schedule, notionals, coupon_rates).build();
 
         assert_eq!(
             leg.len(),
@@ -393,16 +392,6 @@ mod test {
             leg.len()
         );
 
-        let expected_dates = vec![
-            Date::new(25, September, 2017),
-            Date::new(25, March, 2018),
-            Date::new(25, September, 2018),
-            Date::new(25, March, 2019),
-            Date::new(25, September, 2019),
-            Date::new(25, March, 2020),
-            Date::new(25, September, 2020),
-            Date::new(30, September, 2020),
-        ];
         let expected_ref_starts = vec![
             Date::new(25, March, 2017),
             Date::new(25, September, 2017),
@@ -425,10 +414,8 @@ mod test {
         ];
 
         for (i, cf) in leg.iter().enumerate() {
-            //
-            validate_dates(cf.date(), expected_dates[i]);
-            validate_dates(cf.reference_period_start(), expected_ref_starts[i]);
-            validate_dates(cf.reference_period_end(), expected_ref_ends[i]);
+            validate_dates(cf.ref_period_start, expected_ref_starts[i]);
+            validate_dates(cf.ref_period_end, expected_ref_ends[i]);
         }
     }
 

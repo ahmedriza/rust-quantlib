@@ -67,20 +67,8 @@ pub trait Coupon: CashFlow {
     /// Return the nominal
     fn nominal(&self) -> Real;
 
-    /// Start of the accrual period
-    fn accrual_start_date(&self) -> Date;
-
-    /// End of the accrual period
-    fn accrual_end_date(&self) -> Date;
-
     /// Accrued rate
     fn rate(&self) -> Rate;
-
-    /// start date of the reference period
-    fn reference_period_start(&self) -> Date;
-
-    /// End date of the reference period
-    fn reference_period_end(&self) -> Date;
 }
 
 impl<T> Coupon for Rc<T>
@@ -97,23 +85,7 @@ where
         (**self).nominal()
     }
 
-    fn accrual_start_date(&self) -> Date {
-        (**self).accrual_start_date()
-    }
-
-    fn accrual_end_date(&self) -> Date {
-        (**self).accrual_end_date()
-    }
-
     fn rate(&self) -> Rate {
         (**self).rate()
-    }
-
-    fn reference_period_start(&self) -> Date {
-        (**self).reference_period_start()
-    }
-
-    fn reference_period_end(&self) -> Date {
-        (**self).reference_period_end()
     }
 }

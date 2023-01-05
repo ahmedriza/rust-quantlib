@@ -1,26 +1,32 @@
 use std::rc::Rc;
 
-use crate::datetime::SerialNumber;
 use crate::datetime::date::Date;
 use crate::datetime::daycounter::DayCounter;
 use crate::datetime::frequency::Frequency;
 use crate::datetime::period::Period;
 use crate::datetime::timeunit::TimeUnit;
+use crate::datetime::SerialNumber;
 use crate::maths::solvers1d::solver1d::Solver1D;
 use crate::rates::compounding::Compounding;
 use crate::rates::interestrate::InterestRate;
 use crate::types::{Rate, Real, Size, Time};
 
-use super::coupon::{Coupon, CouponLeg};
+use super::coupon::Coupon;
 use super::irrfinder::IrrFinder;
 
 /// Sequence of cashflows
 pub type CashFlowLeg = Vec<Rc<dyn CashFlow>>;
 
 pub trait CashFlow {
+    /// Start of the accrual period
+    fn accrual_start_date(&self) -> Date;
+
+    /// End of the accrual period
+    fn accrual_end_date(&self) -> Date;
+
     /// Accrued amount at the given date
     fn accrued_amount(&self, date: Date) -> Real;
-    
+
     /// Returns the amount of the cash flow. The amount is not discounted, i.e., it is the
     /// actual amount paid at the cash flow date.
     fn amount(&self) -> Real;
@@ -31,6 +37,51 @@ pub trait CashFlow {
     /// Returns the date that the cash flow trades ex-coupon
     fn ex_coupon_date(&self) -> Date {
         Date::default()
+    }
+
+    fn get_stepwise_discount_time(
+        &self,
+        daycounter: &DayCounter,
+        npv_date: Date,
+        last_date: Date,
+    ) -> Time {
+        let cashflow_date = self.date();
+        let mut ref_start_date = self.reference_period_start();
+        let mut ref_end_date = self.reference_period_end();
+
+        if ref_start_date == Date::default() && ref_end_date == Date::default() {
+            ref_start_date = if last_date == npv_date {
+                // we don't have a previous coupon date, so we fake it
+                cashflow_date - Period::new(1, TimeUnit::Years)
+            } else {
+                last_date
+            };
+            ref_end_date = cashflow_date;
+        }
+
+        let accrual_start_date = self.accrual_start_date();
+        if accrual_start_date != Date::default() && last_date != accrual_start_date {
+            let coupon_period = daycounter.year_fraction(
+                &accrual_start_date,
+                &cashflow_date,
+                &ref_start_date,
+                &ref_end_date,
+            );
+            let accrued_period = daycounter.year_fraction(
+                &accrual_start_date,
+                &last_date,
+                &ref_start_date,
+                &ref_end_date,
+            );
+            coupon_period - accrued_period
+        } else {
+            daycounter.year_fraction(
+                &last_date,
+                &cashflow_date,
+                &ref_start_date,
+                &ref_end_date,
+            )
+        }
     }
 
     /// Returns true if a cashflow has already occurred before a date.
@@ -53,6 +104,12 @@ pub trait CashFlow {
         }
     }
 
+    /// start date of the reference period
+    fn reference_period_start(&self) -> Date;
+
+    /// End date of the reference period
+    fn reference_period_end(&self) -> Date;
+
     /// Returns true if the cashflow is trading ex-coupon on the `ref_date`.
     fn trading_ex_coupon(&self, ref_date: Date) -> bool {
         let ecd = self.ex_coupon_date();
@@ -69,10 +126,18 @@ where
     // which will then forbid a type such as `Rc<dyn CashFlow>`
     T: CashFlow + ?Sized,
 {
+    fn accrual_start_date(&self) -> Date {
+        (**self).accrual_start_date()
+    }
+
+    fn accrual_end_date(&self) -> Date {
+        (**self).accrual_end_date()
+    }
+
     fn accrued_amount(&self, settlement_date: Date) -> Real {
         (**self).accrued_amount(settlement_date)
-    }    
-    
+    }
+
     fn amount(&self) -> Real {
         (**self).amount()
     }
@@ -80,17 +145,25 @@ where
     fn date(&self) -> Date {
         (**self).date()
     }
+
+    fn reference_period_start(&self) -> Date {
+        (**self).reference_period_start()
+    }
+
+    fn reference_period_end(&self) -> Date {
+        (**self).reference_period_end()
+    }
 }
 
 // -------------------------------------------------------------------------------------------------
 
-pub fn accurued_amount<T: CashFlow>(
+pub fn accrued_amount<T: CashFlow>(
     leg: &Vec<T>,
     include_settlement_date_flows: bool,
     settlement_date: Date,
 ) -> Real {
     let mut result = 0.0;
-    if let Some(mut i) = __next_cashflow(leg, include_settlement_date_flows, settlement_date) {
+    if let Some(mut i) = next_cashflow(leg, include_settlement_date_flows, settlement_date) {
         let payment_date = leg[i].date();
         while i < leg.len() {
             let cf = &leg[i];
@@ -103,12 +176,12 @@ pub fn accurued_amount<T: CashFlow>(
     result
 }
 
-pub fn accurued_days<T: Coupon>(
+pub fn accrued_days<T: Coupon>(
     leg: &Vec<T>,
     include_settlement_date_flows: bool,
     settlement_date: Date,
 ) -> SerialNumber {
-    if let Some(mut i) = __next_cashflow(leg, include_settlement_date_flows, settlement_date) {
+    if let Some(mut i) = next_cashflow(leg, include_settlement_date_flows, settlement_date) {
         let payment_date = leg[i].date();
         while i < leg.len() {
             let cf = &leg[i];
@@ -121,8 +194,8 @@ pub fn accurued_days<T: Coupon>(
     0
 }
 
-pub fn accrued_period(
-    leg: &CouponLeg,
+pub fn accrued_period<T: Coupon>(
+    leg: &Vec<T>,
     include_settlement_date_flows: bool,
     settlement_date: Date,
 ) -> Time {
@@ -143,9 +216,9 @@ pub fn accrued_period(
 /// The function verifies the theoretical existence of an IRR and numerically establishes the IRR
 /// to the desired precision.
 #[allow(clippy::too_many_arguments)]
-pub fn bond_yield(
+pub fn bond_yield<T: CashFlow>(
     solver: &impl Solver1D,
-    cashflows: &CashFlowLeg,
+    cashflows: &[T],
     npv: Real,
     daycounter: DayCounter,
     compounding: Compounding,
@@ -176,23 +249,19 @@ pub fn bond_yield(
     )
 }
 
-pub fn __next_cashflow<T: CashFlow>(
-    leg: &Vec<T>,
-    include_settlement_date_flows: bool,
-    settlement_date: Date,
-) -> Option<Size> {
-    for (index, cf) in leg.iter().enumerate() {
-        if !cf.has_occurred(&settlement_date, include_settlement_date_flows) {
-            return Some(index);
-        }
+pub fn maturity_date<T: CashFlow>(cashflows: &Vec<T>) -> Date {
+    assert!(!cashflows.is_empty(), "Empty cashflows");
+    let mut d = Date::default();
+    for cf in cashflows {
+        d = d.max(cf.accrual_end_date());
     }
-    None
+    d
 }
 
 /// Return `Some(index)` where `index` is index of first cash flow in the [Leg] if there are
 /// cash flows.  Otherwise return `None`.
-pub fn next_cashflow(
-    leg: &CouponLeg,
+pub fn next_cashflow<T: CashFlow>(
+    leg: &[T],
     include_settlement_date_flows: bool,
     settlement_date: Date,
 ) -> Option<Size> {
@@ -206,8 +275,8 @@ pub fn next_cashflow(
 
 /// NPV of the cash flows.
 /// The NPV is the sum of the cash flows, each discounted according to the given term structure.
-pub fn npv(
-    cashflows: &CashFlowLeg,
+pub fn npv<T: CashFlow>(
+    cashflows: &[T],
     interestrate: &InterestRate,
     include_settlement_date_flows: bool,
     settlement_date: Date,
@@ -234,7 +303,9 @@ pub fn npv(
         if cf.trading_ex_coupon(settlement_date) {
             amount = 0.0;
         }
-        let t = get_stepwise_discount_time(cf, daycounter, npv_date, last_date);
+        // TODO
+        // let t = get_stepwise_discount_time(cf, daycounter, npv_date, last_date);
+        let t = cf.get_stepwise_discount_time(daycounter, npv_date, last_date);
         let b = interestrate.discount_factor(t);
 
         discount *= b;
@@ -244,35 +315,14 @@ pub fn npv(
     npv
 }
 
-/// Calculate Time-To-Discount for each stage when calculating discount factor stepwisely
-pub fn get_stepwise_discount_time(
-    cashflow: &Rc<dyn CashFlow>,
-    daycounter: &DayCounter,
-    npv_date: Date,
-    last_date: Date,
-) -> Time {
-    let cashflow_date = cashflow.date();
-    // TODO
-    // get ref_start_date and ref_end_date from Coupon
-    let ref_start_date = if last_date == npv_date {
-        // we don't have a previous coupon date, so we fake it
-        cashflow_date - Period::new(1, TimeUnit::Years)
-    } else {
-        last_date
-    };
-    let ref_end_date = cashflow_date;
-    // TODO handle coupon
-    daycounter.year_fraction(&last_date, &cashflow_date, &ref_start_date, &ref_end_date)
-}
-
 ///
 /// Calculate the modified duration which is defined as
 ///
 /// D_modified = (−1/P)(∂P/∂y)
 ///
 /// where `P` is the present value of the cash flows according to the given IRR `y`.
-pub fn modified_duration(
-    cashflows: &CashFlowLeg,
+pub fn modified_duration<T: CashFlow>(
+    cashflows: &[T],
     y: &InterestRate,
     include_settlement_date_flows: bool,
     settlement_date: Date,
@@ -304,7 +354,9 @@ pub fn modified_duration(
         if cf.trading_ex_coupon(settlement_date) {
             c = 0.0;
         }
-        t += get_stepwise_discount_time(cf, daycounter, npv_date, last_date);
+        // TODO
+        // t += get_stepwise_discount_time(cf, daycounter, npv_date, last_date);
+        t += cf.get_stepwise_discount_time(daycounter, npv_date, last_date);
         let discount_factor = y.discount_factor(t);
         p += c * discount_factor;
         match y.compounding {
@@ -333,4 +385,26 @@ pub fn modified_duration(
         return 0.0;
     }
     -dpdy / p // reverse derivative sign
+}
+
+/// Calculate Time-To-Discount for each stage when calculating discount factor stepwisely
+/// TODO this needs to be able to handle both simple cash flows and coupons!
+pub fn __get_stepwise_discount_time(
+    cashflow: &Rc<dyn CashFlow>,
+    daycounter: &DayCounter,
+    npv_date: Date,
+    last_date: Date,
+) -> Time {
+    let cashflow_date = cashflow.date();
+    // TODO
+    // get ref_start_date and ref_end_date from Coupon
+    let ref_start_date = if last_date == npv_date {
+        // we don't have a previous coupon date, so we fake it
+        cashflow_date - Period::new(1, TimeUnit::Years)
+    } else {
+        last_date
+    };
+    let ref_end_date = cashflow_date;
+    // TODO handle coupon
+    daycounter.year_fraction(&last_date, &cashflow_date, &ref_start_date, &ref_end_date)
 }

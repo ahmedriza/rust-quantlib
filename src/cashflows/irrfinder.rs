@@ -4,12 +4,12 @@ use crate::{
     types::{Rate, Real},
 };
 
-use super::cashflow::{self, CashFlowLeg};
+use super::cashflow::{self, CashFlow};
 
 /// Provides functions to help in the calculation of the internal rate of return of bond
-/// cash flows. 
-pub struct IrrFinder<'a> {
-    pub cashflows: &'a CashFlowLeg,
+/// cash flows.
+pub struct IrrFinder<'a, T: CashFlow> {
+    pub cashflows: &'a [T],
     pub npv: Real,
     pub daycounter: DayCounter,
     pub compounding: Compounding,
@@ -19,10 +19,10 @@ pub struct IrrFinder<'a> {
     pub npv_date: Date,
 }
 
-impl<'a> IrrFinder<'a> {
+impl<'a, T: CashFlow> IrrFinder<'a, T> {
     #[allow(clippy::too_many_arguments)]
     pub fn new(
-        cashflows: &'a CashFlowLeg,
+        cashflows: &'a [T],
         npv: Real,
         daycounter: DayCounter,
         compounding: Compounding,
@@ -43,7 +43,7 @@ impl<'a> IrrFinder<'a> {
         }
     }
 
-    /// Calculate the NPV of cash flows at the given yield point 
+    /// Calculate the NPV of cash flows at the given yield point
     pub fn at(&self, y: Rate) -> Real {
         // TODO remove the clones
         let bond_yield = InterestRate::new(
@@ -59,10 +59,11 @@ impl<'a> IrrFinder<'a> {
             self.settlement_date,
             self.npv_date,
         );
+
         self.npv - _npv
     }
 
-    /// Calculate the modified duration of bond cash flows at the given yield point 
+    /// Calculate the modified duration of bond cash flows at the given yield point
     pub fn derivative(&self, y: Rate) -> Real {
         // TODO remove the clones
         let bond_yield = InterestRate::new(

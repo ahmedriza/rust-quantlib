@@ -62,7 +62,8 @@ pub trait Bond {
             return 0.0;
         }
 
-        let mut dirty_price = clean_price + self.accrued_amount(settlement_date);
+        let accrued_amount = self.accrued_amount(settlement_date);
+        let mut dirty_price = clean_price + accrued_amount;
         dirty_price /= 100.0 / self.notional(settlement_date);
 
         bondfunctions::bond_yield(

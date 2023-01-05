@@ -19,16 +19,32 @@ impl SimpleCashFlow {
 }
 
 impl CashFlow for SimpleCashFlow {
+    fn accrual_start_date(&self) -> Date {
+        Date::default()
+    }
+
+    fn accrual_end_date(&self) -> Date {
+        Date::default()
+    }
+
     fn accrued_amount(&self, _date: Date) -> Real {
         0.0
     }
-    
+
     fn amount(&self) -> Real {
         self.amount
     }
 
     fn date(&self) -> Date {
         self.date
+    }
+
+    fn reference_period_start(&self) -> Date {
+        Date::default()
+    }
+
+    fn reference_period_end(&self) -> Date {
+        Date::default()
     }
 }
 
@@ -48,6 +64,14 @@ impl Redemption {
 }
 
 impl CashFlow for Redemption {
+    fn accrual_start_date(&self) -> Date {
+        Date::default()
+    }
+
+    fn accrual_end_date(&self) -> Date {
+        Date::default()
+    }
+
     fn accrued_amount(&self, _date: Date) -> Real {
         0.0
     }
@@ -58,6 +82,14 @@ impl CashFlow for Redemption {
 
     fn date(&self) -> Date {
         self.cashflow.date
+    }
+
+    fn reference_period_start(&self) -> Date {
+        Date::default()
+    }
+
+    fn reference_period_end(&self) -> Date {
+        Date::default()
     }
 }
 
@@ -77,6 +109,14 @@ impl AmortizingPayment {
 }
 
 impl CashFlow for AmortizingPayment {
+    fn accrual_start_date(&self) -> Date {
+        Date::default()
+    }
+
+    fn accrual_end_date(&self) -> Date {
+        Date::default()
+    }
+
     fn accrued_amount(&self, _date: Date) -> Real {
         0.0
     }
@@ -87,6 +127,14 @@ impl CashFlow for AmortizingPayment {
 
     fn date(&self) -> Date {
         self.cashflow.date
+    }
+
+    fn reference_period_start(&self) -> Date {
+        Date::default()
+    }
+
+    fn reference_period_end(&self) -> Date {
+        Date::default()
     }
 }
 

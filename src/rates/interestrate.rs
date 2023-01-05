@@ -80,7 +80,7 @@ impl InterestRate {
 
     /// Returns the compound (a.k.a capitalization) factor implied by the rate compounded at time t.
     /// Time must be measured using InterestRate's own day counter.
-    pub fn compound_factor(&self, t: Time) -> Real {
+    pub fn compound_factor(&self, t: Time) -> Real {        
         assert!(t >= 0.0, "negative time ({}) is not allowed", t);
         match self.compounding {
             Compounding::Simple => 1.0 + self.rate * t,

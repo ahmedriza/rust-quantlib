@@ -21,7 +21,6 @@ pub struct ZeroCouponBond {
     pub payment_convention: BusinessDayConvention,
     pub redemption: Real,
     pub issue_date: Date,
-
     pub notionals: Vec<Real>,
     pub notional_schedule: Vec<Date>,
     pub cashflows: CashFlowLeg,
@@ -90,7 +89,7 @@ impl Bond for ZeroCouponBond {
     fn calendar(&self) -> &Calendar {
         &self.calendar
     }
-    
+
     fn cashflows(&self) -> &CashFlowLeg {
         &self.cashflows
     }

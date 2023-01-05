@@ -1,6 +1,6 @@
 pub mod cashflow;
 pub mod coupon;
 pub mod fixedratecoupon;
-pub mod fixedratecouponbuilder;
+pub mod fixedrateleg;
 pub mod irrfinder;
 pub mod simplecashflow;

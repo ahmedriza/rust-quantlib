@@ -1,5 +1,3 @@
-use std::rc::Rc;
-
 use crate::{
     datetime::{
         businessdayconvention::BusinessDayConvention::{self, *},
@@ -15,10 +13,10 @@ use crate::{
     types::{Integer, Rate, Real, Size},
 };
 
-use super::{coupon::CouponLeg, fixedratecoupon::FixedRateCoupon};
+use super::fixedratecoupon::FixedRateCoupon;
 
 /// Helper for building a sequence of [FixedRateCoupon] instances
-pub struct FixedRateCouponBuilder {
+pub struct FixedRateLeg {
     pub schedule: Schedule,
     pub notionals: Vec<Real>,
     pub coupon_rates: Vec<InterestRate>,
@@ -33,7 +31,7 @@ pub struct FixedRateCouponBuilder {
     pub ex_coupon_end_of_month: Option<bool>,                // false
 }
 
-impl FixedRateCouponBuilder {
+impl FixedRateLeg {
     /// Construct a [FixedRateLeg] from the mandatory parameters
     pub fn new(schedule: Schedule, notionals: Vec<Real>, coupon_rates: Vec<InterestRate>) -> Self {
         Self {
@@ -140,7 +138,7 @@ impl FixedRateCouponBuilder {
     }
 
     /// Build [Leg] of fixed rate coupons
-    pub fn build(self) -> CouponLeg {
+    pub fn build(self) -> Vec<FixedRateCoupon> {
         assert!(!self.coupon_rates.is_empty(), "No coupon rates give");
         assert!(!self.notionals.is_empty(), "No notinals given");
 
@@ -151,11 +149,12 @@ impl FixedRateCouponBuilder {
         let payment_adjustment = self.payment_adjustment.unwrap_or(Following);
         let payment_lag = self.payment_lag.unwrap_or(0);
 
-        let mut leg = CouponLeg::new();
+        let mut leg = vec![];
         // first period might be short or long
         let coupon =
             self.make_first_period_coupon(payment_calendar, payment_lag, payment_adjustment);
-        leg.push(Rc::new(coupon));
+        // leg.push(Rc::new(coupon));
+        leg.push(coupon);
 
         // regular periods
         let mut start = self.schedule[1];
@@ -167,7 +166,8 @@ impl FixedRateCouponBuilder {
                 payment_lag,
                 payment_adjustment,
             );
-            leg.push(Rc::new(coupon));
+            // leg.push(Rc::new(coupon));
+            leg.push(coupon);
             start = self.schedule[i];
         }
 
@@ -179,7 +179,8 @@ impl FixedRateCouponBuilder {
                 payment_lag,
                 payment_adjustment,
             );
-            leg.push(Rc::new(coupon));
+            leg.push(coupon);
+            // leg.push(Rc::new(coupon));
         }
         leg
     }
