@@ -244,14 +244,12 @@ mod test {
 
     use super::FixedRateBond;
 
-    #[allow(unused)]
     #[test]
     fn test_fixedratebond() {
         let pricing_date = Date::new(6, June, 2022);
         let pricing_context = PricingContext::new(pricing_date);
         let settlement_days = 1;
-        // let settlement = pricing_date + settlement_days; // Date::new(7, June, 2022);
-        let settlement = Date::new(7, June, 2022);
+        let settlement = pricing_date + settlement_days;
 
         let calendar = UnitedStates::government_bond();
         let daycounter = DayCounter::actual_actual_old_isma();
@@ -261,7 +259,6 @@ mod test {
         let maturity = Date::new(31, May, 2024);
         let ref_start = maturity - Period::new(2, Years);
         let face_amount = 100.0;
-        let tenor = Period::new(6, Months);
         let coupons = vec![2.5 / 100.0];
 
         let schedule = ScheduleBuilder::new(
