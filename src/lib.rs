@@ -3,8 +3,6 @@
 //! This is a pure Rust implementation of
 //! [QuantLib](https://www.quantlib.org/).  We have tried to follow Rust idioms as much as possible.
 //!
-//! We plan to provide Python and R bindings to the library in due course.
-//!
 //! # Example
 //!
 //! The following demonstrates an example of using the library for pricing bonds. More examples
@@ -225,23 +223,22 @@
 //!     }
 //! }
 //! ````
-//! The output should be
+//! #### Output
 //! 
-//!  # Bond Description     price  yield   
-//! -------------------------------------
-//!  1 ZCB/2022-07-05/1M    99.934 0.863%
-//!  2 ZCB/2022-08-02/2M    99.842 1.032%
-//!  3 ZCB/2022-09-08/3M    99.686 1.235%
-//!  4 ZCB/2022-12-08/6M    99.134 1.732%
-//!  5 ZCB/2023-05-18/12M   97.977 2.174%
-//!  6 FRB/2024-05-31/2Y    99.586 2.716%
-//!  7 FRB/2025-05-15/3Y    99.543 2.913%
-//!  8 FRB/2027-06-01/5Y    98.234 3.009%
-//!  9 FRB/2029-05-31/7Y    98.133 3.049%
-//! 10 FRB/2032-05-17/10Y   98.805 3.015%
-//! 11 FRB/2042-05-15/20Y   97.797 3.403%
-//! 12 FRB/2052-05-15/30Y   94.391 3.166%
-//! 
+//! | # | Bond Description  |  price | yield  |  
+//! |---|-------------------|--------|--------|
+//! | 1 | ZCB/2022-07-05/1M | 99.934 | 0.863% |
+//! | 2 | ZCB/2022-08-02/2M | 99.842 | 1.032% |
+//! | 3 | ZCB/2022-09-08/3M | 99.686 | 1.235% |
+//! | 4 | ZCB/2022-12-08/6M | 99.134 | 1.732% |
+//! | 5 | ZCB/2023-05-18/12M| 97.977 | 2.174% |
+//! | 6 | FRB/2024-05-31/2Y | 99.586 | 2.716% |
+//! | 7 | FRB/2025-05-15/3Y | 99.543 | 2.913% |
+//! | 8 | FRB/2027-06-01/5Y | 98.234 | 3.009% |
+//! | 9 | FRB/2029-05-31/7Y | 98.133 | 3.049% |
+//! |10 | FRB/2032-05-17/10Y| 98.805 | 3.015% |
+//! |11 | FRB/2042-05-15/20Y| 97.797 | 3.403% |
+//! |12 | FRB/2052-05-15/30Y| 94.391 | 3.166% |
 //!
 pub mod cashflows;
 pub mod context;
