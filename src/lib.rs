@@ -9,9 +9,8 @@
 //! 
 //! Examples can be found in the examples directory. Use `cargo run --example <name>` where
 //! `<name>` is the name of the example binary (without the .rs suffix), e.g.:
-//! ```
-//! cargo run --example bonds
-//! ```
+//!
+//! `cargo run --example bonds`
 //!
 //! # Example
 //!
@@ -232,7 +231,7 @@
 //!         }
 //!     }
 //! }
-//! ````
+//! ```
 //! #### Output
 //! 
 //! | # | Bond Description  |  price | yield  |  
@@ -253,8 +252,8 @@
 //! # References
 //! 
 //! * [Implementing QuantLib, Luigi Ballabio](https://leanpub.com/implementingquantlib)
-//! * https://people.maths.ox.ac.uk/trefethen/barycentric.pdf
-//! * https://github.com/higham/what-is
+//! * <https://people.maths.ox.ac.uk/trefethen/barycentric.pdf>
+//! * <https://github.com/higham/what-is>
 //!
 //!
 pub mod cashflows;

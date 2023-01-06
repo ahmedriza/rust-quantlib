@@ -10,9 +10,8 @@ blocks of the library, closely following the QuantLib implementations.
 
 Examples can be found in the examples directory. Use `cargo run --example <name>` where
 `<name>` is the name of the example binary (without the .rs suffix), e.g.:
-```rust
-cargo run --example bonds
-```
+
+`cargo run --example bonds`
 
 ## Example
 
@@ -233,8 +232,8 @@ impl CommonData {
         }
     }
 }
-````
-#### Output
+```
+##### Output
 
 | # | Bond Description  |  price | yield  |
 |---|-------------------|--------|--------|
@@ -251,9 +250,10 @@ impl CommonData {
 |11 | FRB/2042-05-15/20Y| 97.797 | 3.403% |
 |12 | FRB/2052-05-15/30Y| 94.391 | 3.166% |
 
+## References
 
 * [Implementing QuantLib, Luigi Ballabio](https://leanpub.com/implementingquantlib)
-* https://people.maths.ox.ac.uk/trefethen/barycentric.pdf
-* https://github.com/higham/what-is
+* <https://people.maths.ox.ac.uk/trefethen/barycentric.pdf>
+* <https://github.com/higham/what-is>
 
 
