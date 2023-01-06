@@ -68,11 +68,11 @@ impl FixedRateBond {
         redemption: Option<Real>,                          // 100.0
         issue_date: Option<Date>,                          // default,
         payment_calendar: Option<Calendar>,                // None,
-        _ex_coupon_period: Option<Period>,
-        _ex_coupon_calendar: Option<Calendar>, // None,
-        _ex_coupon_convention: Option<BusinessDayConvention>, // Unadjusted
-        _ex_coupon_end_of_month: Option<bool>, // false
-        _first_period_daycounter: Option<DayCounter>, // None
+        ex_coupon_period: Option<Period>,
+        ex_coupon_calendar: Option<Calendar>, // None,
+        ex_coupon_convention: Option<BusinessDayConvention>, // Unadjusted
+        ex_coupon_end_of_month: Option<bool>, // false
+        first_period_daycounter: Option<DayCounter>, // None
     ) -> Self {
         let calendar = payment_calendar
             .as_ref()
@@ -87,15 +87,38 @@ impl FixedRateBond {
                 Annual,
             ));
         }
-        let fixed_rate_coupon_builder =
-            FixedRateLeg::new(schedule.clone(), vec![face_amount], coupon_rates)
-                .with_payment_adjustment(
-                    payment_convention.unwrap_or(BusinessDayConvention::Following),
-                );
-        // TODO handle other builder parameters
+        let mut fixed_rate_coupon_builder = FixedRateLeg::new(
+            schedule.clone(),
+            vec![face_amount], // notional amount is face amount
+            coupon_rates,
+        )
+        .with_payment_adjustment(payment_convention.unwrap_or(BusinessDayConvention::Following))
+        .with_payment_calendar(calendar.clone());
+        if let Some(first_period_daycounter) = first_period_daycounter {
+            fixed_rate_coupon_builder =
+                fixed_rate_coupon_builder.with_first_period_daycounter(first_period_daycounter);
+        };
+        if let (
+            Some(ex_coupon_period),
+            Some(ex_coupon_calendar),
+            Some(ex_coupon_convention),
+            Some(ex_coupon_end_of_month),
+        ) = (
+            ex_coupon_period,
+            ex_coupon_calendar,
+            ex_coupon_convention,
+            ex_coupon_end_of_month,
+        ) {
+            fixed_rate_coupon_builder = fixed_rate_coupon_builder.with_ex_coupon_period(
+                ex_coupon_period,
+                ex_coupon_calendar,
+                ex_coupon_convention,
+                ex_coupon_end_of_month,
+            );
+        }
         let coupons = fixed_rate_coupon_builder.build();
 
-        // First, we gather the notional information from the cashflows
+        // Gather the notional information from the cashflows
         let (notionals, notional_schedule) =
             FixedRateBond::calculate_notionals_from_cashflows(&coupons);
 
@@ -104,9 +127,6 @@ impl FixedRateBond {
             &notional_schedule,
             &[redemption.unwrap_or(100.0)], // redemption defaults to 100.0
         );
-
-        // println!("notionals: {:?}", notionals);
-        // println!("notional_schedule: {:#?}", notional_schedule);
 
         // All cashflows including redemptions
         let mut cashflows = CashFlowLeg::new();
@@ -117,15 +137,9 @@ impl FixedRateBond {
             cashflows.push(r.clone());
         }
 
-        /*
-        for cf in cashflows.iter() {
-            println!("cashflow, date: {:?}, amount: {}", cf.date(), cf.amount());
-        }
-         */
-        
-        // TODO
-        // stable_sort now moves the redemptions to the right places
-        // while ensuring that they follow coupons with the same date.
+        // Move the redemptions to the right places while ensuring that they follow coupons
+        // with the same date (stable sort).
+        cashflows.sort_by_key(|a| a.date());
 
         assert!(!cashflows.is_empty(), "bond with no cashflows");
         assert_eq!(
@@ -279,6 +293,12 @@ mod test {
             coupons,
             daycounter.clone(),
         ));
+
+        println!("notionals: {:?}", bond.notionals());
+        println!("notional_schedule: {:#?}", bond.notional_schedule());
+        for cf in bond.cashflows().iter() {
+            println!("cashflow, date: {:?}, amount: {}", cf.date(), cf.amount());
+        }
 
         let clean_price = 99.0 + (18.0 + 3.0 / 4.0) / 32.0;
         println!("clean price: {}", clean_price);
