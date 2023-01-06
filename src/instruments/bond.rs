@@ -33,9 +33,24 @@ pub trait Bond {
         )
     }
 
-    #[allow(clippy::too_many_arguments)]
     /// Calculate the yield given a (clean) price and settlement date.
     fn bond_yield(
+        &self,
+        clean_price: Real,
+        daycounter: DayCounter,
+        compounding: Compounding,
+        frequency: Frequency,
+        settlement_date: Date,
+    ) -> Rate {
+        self.bond_yield_with_options(
+            clean_price, daycounter, compounding, frequency, settlement_date,
+            None, None, None
+        )
+    }
+    
+    #[allow(clippy::too_many_arguments)]
+    /// Calculate the yield given a (clean) price and settlement date.
+    fn bond_yield_with_options(
         &self,
         clean_price: Real,
         daycounter: DayCounter,

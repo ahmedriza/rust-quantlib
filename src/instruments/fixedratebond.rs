@@ -1,4 +1,4 @@
-use std::rc::Rc;
+use std::{rc::Rc, fmt::Debug};
 
 use crate::{
     cashflows::{
@@ -29,6 +29,18 @@ pub struct FixedRateBond {
     pub notional_schedule: Vec<Date>,
     pub cashflows: CashFlowLeg,
     pub redemptions: CashFlowLeg,
+}
+
+impl Debug for FixedRateBond {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        write!(
+            f,
+            "FRB/{}-{:02}-{:02}",
+            self.maturity_date.year(),
+            self.maturity_date.month() as Integer,
+            self.maturity_date.day_of_month(),
+        )
+    }
 }
 
 impl FixedRateBond {
@@ -64,15 +76,15 @@ impl FixedRateBond {
         schedule: Schedule,
         coupons: Vec<Real>,
         accrual_daycounter: DayCounter,
-        payment_convention: Option<BusinessDayConvention>, // Following
-        redemption: Option<Real>,                          // 100.0
-        issue_date: Option<Date>,                          // default,
-        payment_calendar: Option<Calendar>,                // None,
+        payment_convention: Option<BusinessDayConvention>,
+        redemption: Option<Real>,
+        issue_date: Option<Date>,
+        payment_calendar: Option<Calendar>,
         ex_coupon_period: Option<Period>,
-        ex_coupon_calendar: Option<Calendar>, // None,
-        ex_coupon_convention: Option<BusinessDayConvention>, // Unadjusted
-        ex_coupon_end_of_month: Option<bool>, // false
-        first_period_daycounter: Option<DayCounter>, // None
+        ex_coupon_calendar: Option<Calendar>,
+        ex_coupon_convention: Option<BusinessDayConvention>,
+        ex_coupon_end_of_month: Option<bool>,
+        first_period_daycounter: Option<DayCounter>,
     ) -> Self {
         let calendar = payment_calendar
             .as_ref()
@@ -310,9 +322,6 @@ mod test {
                 compounding,
                 frequency,
                 settlement,
-                None,
-                None,
-                None,
             );
         let expected_bond_yield = 2.715783233393491;
         println!(

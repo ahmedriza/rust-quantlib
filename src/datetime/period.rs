@@ -1,6 +1,6 @@
 use std::{
     hash::Hash,
-    ops::{AddAssign, Div, DivAssign, Mul, Neg, SubAssign},
+    ops::{AddAssign, Div, DivAssign, Mul, Neg, SubAssign}, fmt::Debug,
 };
 
 use crate::types::{Integer, Real};
@@ -9,11 +9,29 @@ use crate::datetime::{
     frequency::Frequency, frequency::Frequency::*, timeunit::TimeUnit, timeunit::TimeUnit::*,
 };
 
-#[derive(Clone, Copy, Debug, Eq)]
+#[derive(Clone, Copy, Eq)]
 /// Provides a period represented by a length and [TimeUnit].
 pub struct Period {
     pub length: Integer,
     pub unit: TimeUnit,
+}
+
+// -------------------------------------------------------------------------------------------------
+
+impl Debug for Period {
+    fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
+        match self.unit {
+            Days => write!(f, "{}D", self.length),
+            Weeks => write!(f, "{}W", self.length),
+            Months => write!(f, "{}M", self.length),
+            Years => write!(f, "{}Y", self.length),
+            Hours => write!(f, "{}H", self.length),
+            Minutes => write!(f, "{}m", self.length),
+            Seconds => write!(f, "{}s", self.length),
+            Milliseconds => write!(f, "{}ms", self.length),
+            Microseconds => write!(f, "{}us", self.length),
+        }
+    }
 }
 
 // -------------------------------------------------------------------------------------------------

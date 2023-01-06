@@ -6,6 +6,8 @@ use crate::{
         businessdayconvention::BusinessDayConvention::{self, *},
         calendar::Calendar,
         date::Date,
+        period::Period,
+        timeunit::TimeUnit,
     },
     types::{Integer, Real},
 };
@@ -31,8 +33,7 @@ impl Debug for ZeroCouponBond {
     fn fmt(&self, f: &mut std::fmt::Formatter<'_>) -> std::fmt::Result {
         write!(
             f,
-            "Bond/0.0/{:.2}/{}-{:02}-{:02}",
-            self.face_amount,
+            "ZCB/{}-{:02}-{:02}",
             self.maturity_date.year(),
             self.maturity_date.month() as Integer,
             self.maturity_date.day_of_month(),
@@ -42,6 +43,23 @@ impl Debug for ZeroCouponBond {
 
 impl ZeroCouponBond {
     pub fn new(
+        settlement_days: Integer,
+        calendar: &Calendar,
+        face_amount: Real,
+        maturity_date: Date,
+    ) -> Self {
+        ZeroCouponBond::new_with_options(
+            settlement_days,
+            calendar,
+            face_amount,
+            maturity_date,
+            None,
+            None,
+            None,
+        )
+    }
+
+    pub fn new_with_options(
         settlement_days: Integer,
         calendar: &Calendar,
         face_amount: Real,
@@ -82,6 +100,17 @@ impl ZeroCouponBond {
         let days = maturity_date - settlement_date;
         let interest = 100.0 * discount_yield * days as Real / 360.0;
         100.0 - interest
+    }
+
+    /// Work out the maturity period (in months) based on the given `date`.
+    ///
+    /// If the provided `date` is the issue date, then the calculated period will be accurate.
+    /// Otherwise this is an approximation and only useful for debugging/printing information
+    /// about the bond.
+    pub fn period(&self, date: Date) -> Period {
+        let days = self.maturity_date - date;
+        let m = (days as f64 / 30.0).round() as Integer;
+        Period::new(m, TimeUnit::Months)
     }
 }
 
@@ -141,7 +170,7 @@ mod test {
         let discount_yield = 0.851 / 100.0;
         let maturity_date = Date::new(5, July, 2022);
 
-        let zcb = ZeroCouponBond::new(1, &calendar, face_amount, maturity_date, None, None, None);
+        let zcb = ZeroCouponBond::new(1, &calendar, face_amount, maturity_date);
 
         // let clean_price = zcb_clean_price(discount_yield, maturity_date, settlement_date);
         let clean_price = zcb.price_from_discount_yield(discount_yield, settlement_date);
@@ -153,9 +182,6 @@ mod test {
                 Compounding::SimpleThenCompounded,
                 Semiannual,
                 settlement_date,
-                None,
-                None,
-                None,
             );
 
         let expected_clean_price = 99.93381111111111;
