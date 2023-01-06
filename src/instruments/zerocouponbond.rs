@@ -172,7 +172,6 @@ mod test {
 
         let zcb = ZeroCouponBond::new(1, &calendar, face_amount, maturity_date);
 
-        // let clean_price = zcb_clean_price(discount_yield, maturity_date, settlement_date);
         let clean_price = zcb.price_from_discount_yield(discount_yield, settlement_date);
 
         let bond_yield = 100.0
