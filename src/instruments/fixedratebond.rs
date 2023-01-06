@@ -306,15 +306,7 @@ mod test {
             daycounter.clone(),
         ));
 
-        println!("notionals: {:?}", bond.notionals());
-        println!("notional_schedule: {:#?}", bond.notional_schedule());
-        for cf in bond.cashflows().iter() {
-            println!("cashflow, date: {:?}, amount: {}", cf.date(), cf.amount());
-        }
-
         let clean_price = 99.0 + (18.0 + 3.0 / 4.0) / 32.0;
-        println!("clean price: {}", clean_price);
-
         let bond_yield = 100.0
             * bond.bond_yield(
                 clean_price,
@@ -324,12 +316,6 @@ mod test {
                 settlement,
             );
         let expected_bond_yield = 2.715783233393491;
-        println!(
-            "bond yield: {}, expected: {}, diff: {}",
-            bond_yield,
-            expected_bond_yield,
-            (expected_bond_yield - bond_yield).abs()
-        );
         assert!(
             (expected_bond_yield - bond_yield).abs() < 1.0e-10,
             "Expected bond yield: {}, but got: {}",
