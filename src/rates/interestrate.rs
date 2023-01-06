@@ -50,34 +50,6 @@ impl InterestRate {
         }
     }
 
-    /// Return the [Frequency]
-    pub fn frequency(&self) -> Frequency {
-        if self.frequency_makes_sense {
-            Frequency::from(self.frequency as Integer)
-        } else {
-            Frequency::NoFrequency
-        }
-    }
-
-    /// Discount factor implied by the rate compounded at time t.
-    /// Time must be measured using InterestRate's own day counter.
-    pub fn discount_factor(&self, t: Time) -> DiscountFactor {
-        1.0 / self.compound_factor(t)
-    }
-
-    /// Discount factor implied by the rate compounded between two dates
-    pub fn discount_factor_between_dates(
-        &self,
-        d1: &Date,
-        d2: &Date,
-        ref_start: &Date,
-        ref_end: &Date,
-    ) -> DiscountFactor {
-        assert!(d2 >= d1, "d1 ({:?}) later than d2 ({:?})", d1, d2);
-        let t = self.daycounter.year_fraction(d1, d2, ref_start, ref_end);
-        self.discount_factor(t)
-    }
-
     /// Returns the compound (a.k.a capitalization) factor implied by the rate compounded at time t.
     /// Time must be measured using InterestRate's own day counter.
     pub fn compound_factor(&self, t: Time) -> Real {        
@@ -102,7 +74,7 @@ impl InterestRate {
             }
         }
     }
-
+   
     pub fn compound_factor_between_dates(
         &self,
         d1: &Date,
@@ -113,6 +85,79 @@ impl InterestRate {
         assert!(d2 >= d1, "d1 ({:?}) later than d2 ({:?})", d1, d2);
         let t = self.daycounter.year_fraction(d1, d2, ref_start, ref_end);
         self.compound_factor(t)
+    }
+
+    /// Discount factor implied by the rate compounded at time t.
+    /// Time must be measured using InterestRate's own day counter.
+    pub fn discount_factor(&self, t: Time) -> DiscountFactor {
+        1.0 / self.compound_factor(t)
+    }
+    
+    /// Discount factor implied by the rate compounded between two dates
+    pub fn discount_factor_between_dates(
+        &self,
+        d1: &Date,
+        d2: &Date,
+        ref_start: &Date,
+        ref_end: &Date,
+    ) -> DiscountFactor {
+        assert!(d2 >= d1, "d1 ({:?}) later than d2 ({:?})", d1, d2);
+        let t = self.daycounter.year_fraction(d1, d2, ref_start, ref_end);
+        self.discount_factor(t)
+    }
+
+    /// Equivalent interest rate for a compounding period t.
+    /// The resulting InterestRate shares the same implicit day-counting rule of the original
+    /// InterestRate instance.
+    ///
+    /// Time must be measured using the InterestRate's own day counter.
+    pub fn equivalent_rate(
+        &self,
+        compounding: &Compounding,
+        frequency: Frequency,
+        t: Time,
+    ) -> InterestRate {
+        self.implied_rate(
+            self.compound_factor(t),
+            &self.daycounter,
+            compounding,
+            frequency,
+            t,
+        )
+    }
+
+    /// Equivalent rate for a compounding period between two dates.
+    /// The resulting rate is calculated taking the required day-counting rule into account.
+    #[allow(clippy::too_many_arguments)]
+    pub fn equivalent_rate_between_dates(
+        &self,
+        result_dc: &DayCounter,
+        compounding: &Compounding,
+        frequency: Frequency,
+        d1: &Date,
+        d2: &Date,
+        ref_start: &Date,
+        ref_end: &Date,
+    ) -> InterestRate {
+        assert!(d2 >= d1, "d1 ({:?}) later than d2 ({:?})", d1, d2);
+        let t1 = self.daycounter.year_fraction(d1, d2, ref_start, ref_end);
+        let t2 = result_dc.year_fraction(d1, d2, ref_start, ref_end);
+        self.implied_rate(
+            self.compound_factor(t1),
+            result_dc,
+            compounding,
+            frequency,
+            t2,
+        )
+    }
+    
+    /// Return the [Frequency]
+    pub fn frequency(&self) -> Frequency {
+        if self.frequency_makes_sense {
+            Frequency::from(self.frequency as Integer)
+        } else {
+            Frequency::NoFrequency
+        }
     }
 
     /// Implied interest rate for a given compound factor at a given time.
@@ -176,51 +221,6 @@ impl InterestRate {
         assert!(d2 >= d1, "d1 ({:?}) later than d2 ({:?})", d1, d2);
         let t = result_dc.year_fraction(d1, d2, ref_start, ref_end);
         self.implied_rate(compound, result_dc, compounding, frequency, t)
-    }
-
-    /// Equivalent interest rate for a compounding period t.
-    /// The resulting InterestRate shares the same implicit day-counting rule of the original
-    /// InterestRate instance.
-    ///
-    /// Time must be measured using the InterestRate's own day counter.
-    pub fn equivalent_rate(
-        &self,
-        compounding: &Compounding,
-        frequency: Frequency,
-        t: Time,
-    ) -> InterestRate {
-        self.implied_rate(
-            self.compound_factor(t),
-            &self.daycounter,
-            compounding,
-            frequency,
-            t,
-        )
-    }
-
-    /// Equivalent rate for a compounding period between two dates.
-    /// The resulting rate is calculated taking the required day-counting rule into account.
-    #[allow(clippy::too_many_arguments)]
-    pub fn equivalent_rate_between_dates(
-        &self,
-        result_dc: &DayCounter,
-        compounding: &Compounding,
-        frequency: Frequency,
-        d1: &Date,
-        d2: &Date,
-        ref_start: &Date,
-        ref_end: &Date,
-    ) -> InterestRate {
-        assert!(d2 >= d1, "d1 ({:?}) later than d2 ({:?})", d1, d2);
-        let t1 = self.daycounter.year_fraction(d1, d2, ref_start, ref_end);
-        let t2 = result_dc.year_fraction(d1, d2, ref_start, ref_end);
-        self.implied_rate(
-            self.compound_factor(t1),
-            result_dc,
-            compounding,
-            frequency,
-            t2,
-        )
     }
 }
 

@@ -74,7 +74,7 @@ impl ZeroCouponBond {
 
         let redemption_date = calendar.adjust(maturity_date, payment_convention);
 
-        let redemption_cash_flow = Rc::new(Redemption::new(
+        let rcf = Rc::new(Redemption::new(
             face_amount * redemption / 100.0,
             redemption_date,
         ));
@@ -88,9 +88,9 @@ impl ZeroCouponBond {
             redemption,
             issue_date,
             notionals: vec![face_amount, 0.0],
-            notional_schedule: vec![Date::default(), redemption_cash_flow.cashflow.date],
-            cashflows: vec![redemption_cash_flow.clone()],
-            redemptions: vec![redemption_cash_flow],
+            notional_schedule: vec![Date::default(), rcf.cashflow.date],
+            cashflows: vec![rcf.clone()],
+            redemptions: vec![rcf],
         }
     }
 
