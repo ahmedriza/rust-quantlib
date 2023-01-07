@@ -31,6 +31,12 @@ impl<'a, T: CashFlow> IrrFinder<'a, T> {
         settlement_date: Date,
         npv_date: Date,
     ) -> Self {
+        IrrFinder::check_sign(
+            npv,
+            cashflows,
+            settlement_date,
+            include_settlement_date_flows,
+        );
         Self {
             cashflows,
             npv,
@@ -45,7 +51,6 @@ impl<'a, T: CashFlow> IrrFinder<'a, T> {
 
     /// Calculate the NPV of cash flows at the given yield point
     pub fn at(&self, y: Rate) -> Real {
-        // TODO remove the clones
         let bond_yield = InterestRate::new(
             y,
             self.daycounter.clone(),
@@ -65,7 +70,6 @@ impl<'a, T: CashFlow> IrrFinder<'a, T> {
 
     /// Calculate the modified duration of bond cash flows at the given yield point
     pub fn derivative(&self, y: Rate) -> Real {
-        // TODO remove the clones
         let bond_yield = InterestRate::new(
             y,
             self.daycounter.clone(),
@@ -79,5 +83,37 @@ impl<'a, T: CashFlow> IrrFinder<'a, T> {
             self.settlement_date,
             self.npv_date,
         )
+    }
+
+    /// Depending on the sign of the market price, check that cash flows of the opposite sign
+    /// have been specified (otherwise IRR is nonsensical.)
+    fn check_sign(
+        npv: Real,
+        cashflows: &[T],
+        settlement_date: Date,
+        include_settlement_date_flows: bool,
+    ) {
+        let mut last_sign = (-npv).signum();
+        let mut sign_changes = 0;
+
+        for cf in cashflows {
+            if !cf.has_occurred(&settlement_date, include_settlement_date_flows)
+                && !cf.trading_ex_coupon(settlement_date)
+            {
+                let this_sign = cf.amount().signum();
+                if last_sign * this_sign < 0.0 {
+                    // sign change
+                    sign_changes += 1;
+                }
+                last_sign = this_sign;
+            }
+        }
+
+        assert!(
+            sign_changes > 0,
+            "The given cash flows cannot result in the given market price due to \
+                 their sign, market price: {}",
+            npv
+        );
     }
 }
