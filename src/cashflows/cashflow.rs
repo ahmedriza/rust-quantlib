@@ -382,25 +382,3 @@ pub fn modified_duration<T: CashFlow>(
     }
     -dpdy / p // reverse derivative sign
 }
-
-/// Calculate Time-To-Discount for each stage when calculating discount factor stepwisely
-/// TODO this needs to be able to handle both simple cash flows and coupons!
-pub fn __get_stepwise_discount_time(
-    cashflow: &Rc<dyn CashFlow>,
-    daycounter: &DayCounter,
-    npv_date: Date,
-    last_date: Date,
-) -> Time {
-    let cashflow_date = cashflow.date();
-    // TODO
-    // get ref_start_date and ref_end_date from Coupon
-    let ref_start_date = if last_date == npv_date {
-        // we don't have a previous coupon date, so we fake it
-        cashflow_date - Period::new(1, TimeUnit::Years)
-    } else {
-        last_date
-    };
-    let ref_end_date = cashflow_date;
-    // TODO handle coupon
-    daycounter.year_fraction(&last_date, &cashflow_date, &ref_start_date, &ref_end_date)
-}
