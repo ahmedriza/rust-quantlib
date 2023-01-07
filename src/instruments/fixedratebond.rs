@@ -1,4 +1,4 @@
-use std::{rc::Rc, fmt::Debug};
+use std::{fmt::Debug, rc::Rc};
 
 use crate::{
     cashflows::{
@@ -173,6 +173,31 @@ impl FixedRateBond {
         }
     }
 
+    fn calculate_notionals_from_cashflows<T: Coupon>(coupons: &[T]) -> (Vec<Real>, Vec<Date>) {
+        let mut notionals: Vec<Real> = Vec::new();
+        let mut notional_schedule = vec![Date::default()];
+        let mut last_payment_date = Date::default();
+
+        for cf in coupons.iter() {
+            let notional = cf.nominal();
+            if notionals.is_empty() {
+                last_payment_date = cf.date();
+                notionals.push(notional);
+            } else if !close(notional, notionals[notionals.len() - 1]) {
+                notionals.push(cf.nominal());
+                notional_schedule.push(last_payment_date);
+                last_payment_date = cf.date();
+            } else {
+                last_payment_date = cf.date();
+            }
+        }
+        assert!(!notionals.is_empty(), "No coupons provided");
+        notionals.push(0.0);
+        notional_schedule.push(last_payment_date);
+
+        (notionals, notional_schedule)
+    }
+
     fn calculate_redemptions(
         notionals: &[Real],
         notional_schedule: &[Date],
@@ -197,31 +222,6 @@ impl FixedRateBond {
         }
 
         redemptions
-    }
-
-    fn calculate_notionals_from_cashflows<T: Coupon>(coupons: &[T]) -> (Vec<Real>, Vec<Date>) {
-        let mut notionals: Vec<Real> = Vec::new();
-        let mut notional_schedule = vec![Date::default()];
-        let mut last_payment_date = Date::default();
-
-        for cf in coupons.iter() {
-            let notional = cf.nominal();
-            if notionals.is_empty() {
-                last_payment_date = cf.date();
-                notionals.push(notional);
-            } else if !close(notional, notionals[notionals.len() - 1]) {
-                notionals.push(cf.nominal());
-                notional_schedule.push(last_payment_date);
-                last_payment_date = cf.date();
-            } else {
-                last_payment_date = cf.date();
-            }
-        }
-        assert!(!notionals.is_empty(), "No coupons provided");
-        notionals.push(0.0);
-        notional_schedule.push(last_payment_date);
-
-        (notionals, notional_schedule)
     }
 }
 
@@ -307,14 +307,8 @@ mod test {
         ));
 
         let clean_price = 99.0 + (18.0 + 3.0 / 4.0) / 32.0;
-        let bond_yield = 100.0
-            * bond.bond_yield(
-                clean_price,
-                daycounter,
-                compounding,
-                frequency,
-                settlement,
-            );
+        let bond_yield =
+            100.0 * bond.bond_yield(clean_price, daycounter, compounding, frequency, settlement);
         let expected_bond_yield = 2.715783233393491;
         assert!(
             (expected_bond_yield - bond_yield).abs() < 1.0e-10,
