@@ -303,8 +303,6 @@ pub fn npv<T: CashFlow>(
         if cf.trading_ex_coupon(settlement_date) {
             amount = 0.0;
         }
-        // TODO
-        // let t = get_stepwise_discount_time(cf, daycounter, npv_date, last_date);
         let t = cf.get_stepwise_discount_time(daycounter, npv_date, last_date);
         let b = interestrate.discount_factor(t);
 
@@ -354,8 +352,6 @@ pub fn modified_duration<T: CashFlow>(
         if cf.trading_ex_coupon(settlement_date) {
             c = 0.0;
         }
-        // TODO
-        // t += get_stepwise_discount_time(cf, daycounter, npv_date, last_date);
         t += cf.get_stepwise_discount_time(daycounter, npv_date, last_date);
         let discount_factor = y.discount_factor(t);
         p += c * discount_factor;
