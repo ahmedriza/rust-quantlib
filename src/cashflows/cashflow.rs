@@ -160,15 +160,15 @@ where
 pub fn accrued_amount<T: CashFlow>(
     leg: &Vec<T>,
     include_settlement_date_flows: bool,
-    settlement_date: Date,
+    date: Date,
 ) -> Real {
     let mut result = 0.0;
-    if let Some(mut i) = next_cashflow(leg, include_settlement_date_flows, settlement_date) {
+    if let Some(mut i) = next_cashflow(leg, include_settlement_date_flows, date) {
         let payment_date = leg[i].date();
         while i < leg.len() {
             let cf = &leg[i];
             if cf.date() == payment_date {
-                result += cf.accrued_amount(settlement_date);
+                result += cf.accrued_amount(date);
             }
             i += 1;
         }
@@ -179,14 +179,14 @@ pub fn accrued_amount<T: CashFlow>(
 pub fn accrued_days<T: Coupon>(
     leg: &Vec<T>,
     include_settlement_date_flows: bool,
-    settlement_date: Date,
+    date: Date,
 ) -> SerialNumber {
-    if let Some(mut i) = next_cashflow(leg, include_settlement_date_flows, settlement_date) {
+    if let Some(mut i) = next_cashflow(leg, include_settlement_date_flows, date) {
         let payment_date = leg[i].date();
         while i < leg.len() {
             let cf = &leg[i];
             if cf.date() == payment_date {
-                return cf.accrued_days(settlement_date);
+                return cf.accrued_days(date);
             }
             i += 1;
         }
@@ -197,14 +197,14 @@ pub fn accrued_days<T: Coupon>(
 pub fn accrued_period<T: Coupon>(
     leg: &Vec<T>,
     include_settlement_date_flows: bool,
-    settlement_date: Date,
+    date: Date,
 ) -> Time {
-    if let Some(mut i) = next_cashflow(leg, include_settlement_date_flows, settlement_date) {
+    if let Some(mut i) = next_cashflow(leg, include_settlement_date_flows, date) {
         let payment_date = leg[i].date();
         while i < leg.len() {
             let cf = &leg[i];
             if cf.date() == payment_date {
-                return cf.accrued_period(settlement_date);
+                return cf.accrued_period(date);
             }
             i += 1;
         }

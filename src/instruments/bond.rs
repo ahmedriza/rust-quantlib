@@ -18,18 +18,18 @@ pub enum BondPriceType {
 
 pub trait Bond {
     /// Accrued amount at a given date
-    fn accrued_amount(&self, settlement_date: Date) -> Real {
-        if !self.is_tradeable(settlement_date) {
+    fn accrued_amount(&self, date: Date) -> Real {
+        if !self.is_tradeable(date) {
             return 0.0;
         }
-        let current_notional = self.notional(settlement_date);
+        let current_notional = self.notional(date);
         if current_notional == 0.0 {
             return 0.0;
         }
         bondfunctions::accrued_amount(
             self.cashflows(),
-            self.notional(settlement_date),
-            settlement_date,
+            self.notional(date),
+            date,
         )
     }
 

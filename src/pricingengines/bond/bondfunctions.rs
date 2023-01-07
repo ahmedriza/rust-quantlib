@@ -12,18 +12,18 @@ use crate::{
 pub fn accrued_amount<T: CashFlow>(
     cashflows: &Vec<T>,
     notional: Real,
-    settlement_date: Date,
+    date: Date,
 ) -> Real {
-    let accrued_amount = cashflow::accrued_amount(cashflows, false, settlement_date);
+    let accrued_amount = cashflow::accrued_amount(cashflows, false, date);
     accrued_amount * 100.0 / notional
 }
 
-pub fn accrued_days<T: Coupon>(coupons: &Vec<T>, settlement_date: Date) -> SerialNumber {
-    cashflow::accrued_days(coupons, false, settlement_date)
+pub fn accrued_days<T: Coupon>(coupons: &Vec<T>, date: Date) -> SerialNumber {
+    cashflow::accrued_days(coupons, false, date)
 }
 
-pub fn accrued_period<T: Coupon>(coupons: &Vec<T>, settlement_date: Date) -> Time {
-    cashflow::accrued_period(coupons, false, settlement_date)
+pub fn accrued_period<T: Coupon>(coupons: &Vec<T>, date: Date) -> Time {
+    cashflow::accrued_period(coupons, false, date)
 }
 
 #[allow(clippy::too_many_arguments)]
